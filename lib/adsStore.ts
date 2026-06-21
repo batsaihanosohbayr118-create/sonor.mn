@@ -1,19 +1,11 @@
-import fs from 'fs/promises';
-import path from 'path';
+import { kv } from '@vercel/kv';
 import type { Ad } from '@/data/newsData';
 
-const adsPath = path.join(process.cwd(), 'data', 'ads.json');
+const ADS_KEY = 'ads:list';
 
 const readStoredAds = async (): Promise<Ad[]> => {
-  try {
-    const raw = await fs.readFile(adsPath, 'utf8');
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as Ad[]) : [];
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code;
-    if (code === 'ENOENT') return [];
-    throw error;
-  }
+  const ads = await kv.get<Ad[]>(ADS_KEY);
+  return Array.isArray(ads) ? ads : [];
 };
 
 export const getAds = async (): Promise<Ad[]> => {
@@ -26,8 +18,7 @@ export const getActiveAds = async (): Promise<Ad[]> => {
 };
 
 export const saveAds = async (ads: Ad[]) => {
-  await fs.mkdir(path.dirname(adsPath), { recursive: true });
-  await fs.writeFile(adsPath, `${JSON.stringify(ads, null, 2)}\n`, 'utf8');
+  await kv.set(ADS_KEY, ads);
 };
 
 export const normalizeAdInput = (input: Partial<Ad>, nextId: number): Ad => {
