@@ -8,15 +8,14 @@ export default function PollCard() {
 
   const handleVote = (option) => {
     if (!voted) {
-      if (option === 'yes') {
-        setYes(yes + 1);
-      } else {
-        setNo(no + 1);
-      }
+      const newYes = option === 'yes' ? yes + 1 : yes;
+      const newNo = option === 'no' ? no + 1 : no;
+      setYes(newYes);
+      setNo(newNo);
       setVoted(true);
       POLL.voted = true;
-      POLL.yes = option === 'yes' ? yes + 1 : yes;
-      POLL.no = option === 'no' ? no + 1 : no;
+      POLL.yes = newYes;
+      POLL.no = newNo;
     }
   };
 
@@ -29,37 +28,39 @@ export default function PollCard() {
       <div className="head">Санал асуулга</div>
       <div className="pad">
         <p className="q">Та одоогийн засгийн газрыг дэмжиж байна уу?</p>
-        
-        <div className="opt">
-          <button onClick={() => handleVote('yes')} disabled={voted}>
-            Тийм
-          </button>
-        </div>
-        <div className="opt">
-          <button onClick={() => handleVote('no')} disabled={voted}>
-            Үгүй
-          </button>
-        </div>
 
-        <div className="barwrap">
-          <div className="toprow">
-            <span>Тийм</span>
-            <span>{yesPercent}%</span>
-          </div>
-          <div className="track2">
-            <div className="fill" style={{ width: `${yesPercent}%`, background: '#1C7C54' }}></div>
-          </div>
+        {!voted && (
+          <>
+            <div className="opt">
+              <button onClick={() => handleVote('yes')}>Тийм</button>
+            </div>
+            <div className="opt">
+              <button onClick={() => handleVote('no')}>Үгүй</button>
+            </div>
+          </>
+        )}
 
-          <div className="toprow" style={{ marginTop: '10px' }}>
-            <span>Үгүй</span>
-            <span>{noPercent}%</span>
-          </div>
-          <div className="track2">
-            <div className="fill" style={{ width: `${noPercent}%`, background: '#C73A43' }}></div>
-          </div>
+        {voted && (
+          <div className="barwrap">
+            <div className="toprow">
+              <span>Тийм</span>
+              <span>{yesPercent}%</span>
+            </div>
+            <div className="track2">
+              <div className="fill" style={{ width: `${yesPercent}%`, background: '#1C7C54' }}></div>
+            </div>
 
-          <p className="thanks">Таны санал дүүргээд баярлалаа.</p>
-        </div>
+            <div className="toprow" style={{ marginTop: '10px' }}>
+              <span>Үгүй</span>
+              <span>{noPercent}%</span>
+            </div>
+            <div className="track2">
+              <div className="fill" style={{ width: `${noPercent}%`, background: '#C73A43' }}></div>
+            </div>
+
+            <p className="thanks">Таны санал дүүргээд баярлалаа.</p>
+          </div>
+        )}
       </div>
     </div>
   );

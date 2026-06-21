@@ -3,7 +3,9 @@ import Link from 'next/link';
 import { CATS } from '@/data/newsData';
 
 export default function HeroArticle({ article }) {
-  const category = CATS[article.cat];
+  if (!article) return null; // ← ЭНЭ МӨРИЙГ НЭМЭХ
+
+  const category = CATS[article.cat] ?? CATS['uih']; // ← fallback нэмэх
 
   return (
     <Link href={`/articles/${article.id}`} className="hero">
