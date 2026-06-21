@@ -1,10 +1,15 @@
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import type { Ad } from '@/data/newsData';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_KV_REST_API_URL!,
+  token: process.env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN!,
+});
 
 const ADS_KEY = 'ads:list';
 
 const readStoredAds = async (): Promise<Ad[]> => {
-  const ads = await kv.get<Ad[]>(ADS_KEY);
+  const ads = await redis.get<Ad[]>(ADS_KEY);
   return Array.isArray(ads) ? ads : [];
 };
 
@@ -18,7 +23,7 @@ export const getActiveAds = async (): Promise<Ad[]> => {
 };
 
 export const saveAds = async (ads: Ad[]) => {
-  await kv.set(ADS_KEY, ads);
+  await redis.set(ADS_KEY, ads);
 };
 
 export const normalizeAdInput = (input: Partial<Ad>, nextId: number): Ad => {
