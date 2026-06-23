@@ -1,8 +1,14 @@
 :root{
-  --navy:#3f57c3; --blue:#3f57c3; --blue-accent:#6E97BC; --red:#C73A43;
+  /* Брэнд өнгө — логоны цэнхэр (#0076cc) болон улаан (#C73A43) */
+  --navy:#0076cc;        /* логоны дөрвөлжин өнгөтэй яг таарна — navbar */
+  --blue:#0076cc;        /* үндсэн брэнд цэнхэр */
+  --blue-accent:#0076cc; /* hover */
+  --red:#e71c2d;         /* логоны улаан */
   --green:#1C7C54; --amber:#C97A0E;
   --ink:#16181d; --muted:#646b75; --faint:#8b919b;
-  --paper:#ffffff; --surface:#f5f6f8; --line:#e4e7eb;
+  --paper:#f0eff8;       /* цэнхэр #0076cc + улаан #C73A43 хольсон цайвар тон */
+  --surface:#e6e4f2;     /* card/panel дэвсгэр */
+  --line:#ccc9e4;        /* хүрээ */
   --serif:'PT Serif',Georgia,'Times New Roman',serif;
   --sans:'Inter',system-ui,-apple-system,sans-serif;
 }
@@ -30,7 +36,7 @@ a{
 }
 
 .wrap{
-  max-width:1080px;
+  max-width:1400px;
   margin:0 auto;
   padding:0 20px
 }
@@ -41,7 +47,7 @@ img{
 
 /* utility strip */
 .utility{
-  background:rgba(71,103,141,.06);
+  background:var(--surface);
   border-bottom:1px solid var(--line);
   font-size:12.5px;
   color:var(--muted)
@@ -137,7 +143,7 @@ img{
   margin-top:10px;
   padding:16px;
   border-radius:16px;
-  background:#fff;
+  background:var(--paper);
   border:1px solid var(--line);
   box-shadow:0 18px 50px rgba(0,0,0,.12);
   font-size:13px;
@@ -203,8 +209,8 @@ img{
 
 /* masthead */
 .masthead{
-  background:#fff;
-  border-bottom:1px solid rgba(0,0,0,.06)
+  background:var(--paper);
+  border-bottom:1px solid var(--line)
 }
 
 .masthead .wrap{
@@ -222,10 +228,10 @@ img{
 }
 
 .logo {
-  height: 82px;  
+  height: 64px;  
   width: auto;
-  max-width: min(300px, 68vw);
-  transform:scale(1.36);
+  max-width: min(260px, 60vw);
+  transform:scale(1.15);
   transform-origin:left center;
 }
 
@@ -257,7 +263,7 @@ img{
   right: 0;
   top: calc(100% + 10px);
   width: 360px;
-  background: #fff;
+  background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 16px;
@@ -334,7 +340,7 @@ img{
 
 /* nav */
 nav.main{
-  background:var(--navy);
+  background:#3f57c3;
   position:sticky;
   top:0;
   z-index:50;
@@ -387,6 +393,53 @@ nav.main a.active{
 nav.main a.active::after{
   transform:scaleX(1);
   background:var(--red)
+}
+
+/* hamburger button — desktop дээр нуугдана */
+.nav-toggle{
+  display:none;
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding:10px 16px;
+  margin-left:auto;
+  color:#fff;
+  flex-direction:column;
+  gap:5px;
+  align-items:center;
+  justify-content:center
+}
+.nav-toggle span{
+  display:block;
+  width:22px;
+  height:2px;
+  background:#fff;
+  border-radius:2px;
+  transition:transform .25s, opacity .2s
+}
+
+/* mobile nav drawer */
+.nav-drawer{
+  display:none;
+  flex-direction:column;
+  background:#3f57c3;
+  border-top:1px solid rgba(255,255,255,.15)
+}
+.nav-drawer a{
+  color:rgba(255,255,255,.85);
+  font-size:14px;
+  font-weight:500;
+  padding:13px 20px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  transition:background .15s, color .15s
+}
+.nav-drawer a:hover,
+.nav-drawer a.active{
+  background:rgba(255,255,255,.1);
+  color:#fff
+}
+.nav-drawer.open{
+  display:flex
 }
 /* breaking ticker */
 .ticker{
@@ -444,15 +497,27 @@ main{
 
 /* page wrapper */
 .page-inner{
-  max-width:1080px;
+  max-width:1400px;
   margin:0 auto
 }
 
-/* layout grid */
+/* layout grid — 3 column: main | side | videoside */
 .grid{
   display:grid;
-  grid-template-columns:1.7fr 1fr;
+  grid-template-columns:1.7fr 1fr 1fr;
   gap:28px
+}
+.grid > :first-child{
+  grid-column:1;
+  grid-row:1
+}
+aside.side{
+  grid-column:2;
+  grid-row:1
+}
+aside.videoside{
+  grid-column:3;
+  grid-row:1
 }
 
 /* ad banner */
@@ -520,7 +585,8 @@ main{
 .hero .thumb{
   height:360px;
   font-size:46px;
-  overflow:hidden
+  overflow:hidden;
+  border-radius:10px
 }
 
 .hero .thumb img{
@@ -528,6 +594,7 @@ main{
   height:360px;
   object-fit:cover;
   display:block;
+  border-radius:10px;
   transition:transform .4s ease, filter .4s ease
 }
 
@@ -1236,7 +1303,7 @@ main{
   border:1px solid var(--line);
   border-radius:8px;
   padding:10px 12px;
-  background:#fff;
+  background:var(--paper);
   color:var(--ink);
   font:inherit;
   font-size:14px
@@ -1281,7 +1348,7 @@ main{
 
 .admin-secondary{
   color:var(--blue);
-  background:#fff;
+  background:var(--paper);
   border:1.5px solid var(--blue);
   font-weight:600;
   border-radius:10px;
@@ -1295,7 +1362,7 @@ main{
 
 .admin-danger{
   color:var(--red);
-  background:#fff;
+  background:var(--paper);
   border-color:#f1c9cd
 }
 .admin-danger:hover{
@@ -1331,7 +1398,7 @@ main{
   padding:20px
 }
 .confirm-box{
-  background:#fff;
+  background:var(--paper);
   border-radius:14px;
   padding:24px 24px 20px;
   max-width:380px;
@@ -1360,7 +1427,7 @@ main{
   transition:background .15s,border-color .15s,color .15s
 }
 .confirm-cancel{
-  background:#fff;
+  background:var(--paper);
   border:1px solid var(--line);
   color:var(--ink)
 }
@@ -1552,6 +1619,13 @@ main{
   line-height:1.65;
   margin-bottom:6px
 }
+@media(max-width:760px){
+  .policy h1{font-size:22px;margin-bottom:6px}
+  .policy .intro{font-size:13.5px;margin-bottom:18px;padding-bottom:16px}
+  .policy h2{font-size:15px;margin:18px 0 6px}
+  .policy p{font-size:13.5px}
+  .policy li{font-size:13.5px}
+}
 .trustgrid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -1600,10 +1674,43 @@ main{
   background:var(--blue);
   color:#fff
 }
+@media(max-width:760px){
+  .people-filter button{
+    padding:7px 12px;
+    font-size:13px;
+    min-width:unset
+  }
+}
 .people-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
   gap:14px
+}
+@media(max-width:760px){
+  .people-grid{
+    display:grid;
+    grid-auto-flow:column;
+    grid-auto-columns:minmax(150px,1fr);
+    grid-template-columns:none;
+    grid-template-rows:repeat(2,auto);
+    gap:10px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x proximate;
+    padding-bottom:6px
+  }
+  .people-grid::-webkit-scrollbar{display:none}
+  .people-grid{scrollbar-width:none}
+  .pcard{
+    flex-direction:column;
+    gap:8px;
+    padding:12px;
+    scroll-snap-align:start
+  }
+  .pcard .pname{font-size:13px}
+  .pcard .prole{font-size:11.5px;margin-bottom:4px}
+  .pavatar{width:36px;height:36px;min-width:36px;font-size:12px}
 }
 .pcard{
   border:1px solid var(--line);
@@ -1680,17 +1787,21 @@ main{
   top:9px;
   right:11px;
   background:none;
-  border:none;
+  border:1px solid transparent;
   color:var(--faint);
-  font-size:18px;
+  font-size:14px;
+  font-weight:500;
   line-height:1;
   cursor:pointer;
-  padding:1px 5px;
-  border-radius:6px
+  padding:5px 12px;
+  border-radius:8px;
+  transition:all .18s ease
 }
 .pdel:hover{
-  color:var(--red);
-  background:var(--surface)
+  color:#c0392b;
+  background:#fff0f0;
+  border-color:#f5c0bb;
+  box-shadow:0 2px 8px rgba(199,58,67,.15)
 }
 .addbtn{
   background:var(--blue);
@@ -1821,12 +1932,24 @@ footer .wrap{
 
 @media(max-width:760px){
   .grid{grid-template-columns:1fr;gap:24px}
-  .masthead .wrap{height:70px;padding-top:0;padding-bottom:0}
-  .logo-link{height:70px}
-  .logo{height:58px;max-width:230px;transform:scale(1.26)}
+  .grid > :first-child,.grid aside.side,.grid aside.videoside{grid-column:1;grid-row:auto}
+  .masthead .wrap{height:60px;padding-top:0;padding-bottom:0;display:flex;justify-content:space-between;align-items:center}
+  .logo-link{height:60px}
+  .logo{height:44px;max-width:180px;transform:scale(1.0)}
+  .feedback-toggle{font-size:11px;padding:6px 10px}
+  .feedback-dropdown{
+    position:fixed;
+    top:50%;
+    left:50%;
+    right:auto;
+    transform:translate(-50%,-50%);
+    width:calc(100vw - 48px);
+    max-width:320px;
+    padding:14px
+  }
   .hero h2{font-size:21px}
-  .article h1{font-size:26px}
-  .article .content p{font-size:16.5px}
+  .article h1{font-size:22px;margin:8px 0 10px}
+  .article .content p{font-size:15px;line-height:1.65;margin-bottom:14px}
   .trustgrid{grid-template-columns:1fr}
   .fcols{grid-template-columns:1fr 1fr;gap:22px}
   .article .lead-thumb{height:200px}
@@ -1838,6 +1961,25 @@ footer .wrap{
   .admin-list{position:static}
   .admin-fields{grid-template-columns:1fr}
   .admin-submit .admin-primary{width:100%}
+  .admin-list-items{
+    max-height:320px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:0
+  }
+  /* utility bar mobile */
+  .utility .wrap{height:44px;padding:0 12px;flex-wrap:nowrap;gap:6px}
+  .utility .wrap > *:first-child{display:none}
+  .utility .right{gap:6px;flex-shrink:0;margin-left:auto}
+  .weather-toggle{min-width:unset;padding:5px 8px;font-size:11px;gap:5px}
+  .searchbtn{padding:5px 7px;font-size:11px;gap:3px}
+  .searchbtn span{display:none}
+  /* hamburger */
+  .nav-toggle{display:flex}
+  nav.main .wrap{display:none}
+  /* sidebar goes below on mobile */
+  .sidebar{width:100%}
 }
 
 .detail-modal::-webkit-scrollbar {
@@ -1904,4 +2046,227 @@ footer .wrap{
 .admin-list-text{
   flex:1;
   min-width:0
+}
+
+/* ── Split layout ── */
+.weather-split-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2rem;
+  align-items: start;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .weather-split-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Map panel ── */
+.weather-map-panel {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.weather-map-container {
+  position: relative;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background: linear-gradient(145deg, #dce8f5 0%, #c8dff0 60%, #b8d4ea 100%);
+  padding: 1rem;
+}
+
+.weather-map-svg {
+  width: 130%;
+  height: auto;
+  display: block;
+}
+
+.weather-map-svg path {
+  fill: #6db8e4;
+  stroke: #ece6e6;
+  stroke-width: 1.5px;
+  transition: fill 0.15s, stroke 0.15s;
+}
+
+.weather-map-svg path:hover {
+  fill: #3980e3;
+  stroke: #3e7bd8;
+  cursor: pointer;
+}
+
+/* ── Tooltip ── */
+.weather-map-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--paper);
+  border: 1px solid #e0ddd6;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-width: 140px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  z-index: 10;
+}
+
+.wmt-province {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2C2C2A;
+  margin-bottom: 1px;
+}
+
+.wmt-center {
+  font-size: 11px;
+  color: #888780;
+  margin-bottom: 6px;
+}
+
+.wmt-temp {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.wmt-label {
+  font-size: 12px;
+  color: #5F5E5A;
+  margin-top: 2px;
+}
+
+.wmt-wind {
+  font-size: 11px;
+  color: #888780;
+  margin-top: 4px;
+}
+
+.wmt-error,
+.wmt-loading {
+  font-size: 12px;
+  color: #888780;
+  font-style: italic;
+}
+
+/* ── Legend ── */
+.weather-map-legend {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e5e2;
+}
+
+.wml-label {
+  font-size: 11px;
+  color: #888780;
+  margin-bottom: 6px;
+}
+
+.wml-scale {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.wml-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #5F5E5A;
+}
+
+.wml-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ── Detail panel ── */
+.weather-detail-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.weather-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.weather-detail-copy h1 {
+  margin: 0 0 4px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #2C2C2A;
+}
+
+.weather-detail-copy p {
+  margin: 0;
+  font-size: 14px;
+  color: #888780;
+}
+
+.weather-detail-card {
+  border: 1px solid #e5e5e2;
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: var(--paper);
+}
+
+.weather-detail-temp {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #f0ede8;
+}
+
+.weather-detail-temp strong {
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.weather-detail-temp span {
+  font-size: 16px;
+  color: #5F5E5A;
+}
+
+.weather-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.weather-detail-item {
+  background: #f8f7f4;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.weather-detail-item span {
+  display: block;
+  font-size: 12px;
+  color: #888780;
+  margin-bottom: 4px;
+}
+
+.weather-detail-item strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2C2C2A;
+}
+/* rates dropdown – hide scrollbar */
+.rates-dropdown{
+  scrollbar-width:none;
+  -ms-overflow-style:none
+}
+.rates-dropdown::-webkit-scrollbar{
+  display:none
 }

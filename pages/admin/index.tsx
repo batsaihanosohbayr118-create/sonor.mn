@@ -1,11 +1,11 @@
 import React, { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
-import { CATS, Article, SEED_MPS, SEED_AMB, MP, Ad } from '@/data/newsData';
+import { CATS, Article, SEED_MPS, SEED_AMB, MP, Ad, Video } from '@/data/newsData';
 import { isAdminRequest } from '@/lib/adminAuth';
 import ConfirmModal from '@/components/ConfirmModal';
 
-type Tab = 'articles' | 'mps' | 'ambassadors' | 'ads';
+type Tab = 'articles' | 'mps' | 'ambassadors' | 'ads' | 'videos';
 
 type ArticleForm = {
   id?: number;
@@ -35,10 +35,22 @@ type AdForm = {
   active: boolean;
 };
 
+type VideoForm = {
+  title: string;
+  youtubeId: string;
+  active: boolean;
+};
+
 const emptyAdForm: AdForm = {
   title: '',
   image: '',
   link: '',
+  active: true,
+};
+
+const emptyVideoForm: VideoForm = {
+  title: '',
+  youtubeId: '',
   active: true,
 };
 
@@ -101,6 +113,37 @@ const toAdForm = (ad: Ad): AdForm => ({
   link: ad.link ?? '',
   active: ad.active,
 });
+
+const toVideoForm = (video: Video): VideoForm => ({
+  title: video.title,
+  youtubeId: video.youtubeId,
+  active: video.active,
+});
+
+// Preview-д ашиглах туслах функц — videosStore.ts дотор байгаа
+// extractYoutubeId-ийн ХУУЛБАР (серверийн логиктой ижил байх ёстой).
+// Хэрэглэгч бүтэн линк (playlist/timestamp параметртэй ч) буулгасан үед
+// preview iframe-д зөв embed URL харуулахын тулд хэрэгтэй.
+const extractYoutubeIdClient = (input: string): string => {
+  const trimmed = input.trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+
+  try {
+    const url = new URL(trimmed);
+    if (url.hostname.includes('youtu.be')) {
+      return url.pathname.replace('/', '');
+    }
+    if (url.hostname.includes('youtube.com')) {
+      if (url.pathname === '/watch') return url.searchParams.get('v') ?? trimmed;
+      if (url.pathname.startsWith('/embed/')) return url.pathname.split('/embed/')[1];
+      if (url.pathname.startsWith('/shorts/')) return url.pathname.split('/shorts/')[1];
+    }
+  } catch {
+    // URL биш бол доор анхны утгыг буцаана
+  }
+
+  return trimmed;
+};
 
 function CustomSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [open, setOpen] = useState(false);
@@ -312,6 +355,13 @@ export default function AdminPage() {
   const [adsLoading, setAdsLoading] = useState(true);
   const [adsSaving, setAdsSaving] = useState(false);
 
+  // --- Видео ---
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [videoForm, setVideoForm] = useState<VideoForm>(emptyVideoForm);
+  const [selectedVideoId, setSelectedVideoId] = useState<number | null>(null);
+  const [videosLoading, setVideosLoading] = useState(true);
+  const [videosSaving, setVideosSaving] = useState(false);
+
   // --- Устгах баталгаажуулах modal ---
   const [confirmState, setConfirmState] = useState<{ message: string; onConfirm: () => void } | null>(null);
 
@@ -330,6 +380,11 @@ export default function AdminPage() {
   const selectedAd = useMemo(
     () => ads.find(a => a.id === selectedAdId) ?? null,
     [ads, selectedAdId],
+  );
+
+  const selectedVideo = useMemo(
+    () => videos.find(v => v.id === selectedVideoId) ?? null,
+    [videos, selectedVideoId],
   );
 
   const filteredArticles = useMemo(() => {
@@ -362,6 +417,17 @@ export default function AdminPage() {
   };
 
   useEffect(() => { loadAds(); }, []);
+
+  const loadVideos = async () => {
+    setVideosLoading(true);
+    const res = await fetch('/api/admin/videos');
+    setVideosLoading(false);
+    if (res.status === 401) { router.replace('/admin/login'); return; }
+    const json = await res.json();
+    setVideos(json.videos ?? []);
+  };
+
+  useEffect(() => { loadVideos(); }, []);
 
   const updateField = <K extends keyof ArticleForm>(key: K, value: ArticleForm[K]) => {
     setForm(cur => ({ ...cur, [key]: value }));
@@ -543,6 +609,57 @@ export default function AdminPage() {
     });
   };
 
+  // --- Видео handlers ---
+  const resetVideoForm = () => {
+    setSelectedVideoId(null);
+    setVideoForm(emptyVideoForm);
+    setError(''); setStatus('');
+  };
+
+  const editVideo = (video: Video) => {
+    setSelectedVideoId(video.id);
+    setVideoForm(toVideoForm(video));
+    setError(''); setStatus('');
+  };
+
+  const saveVideo = async () => {
+    setError(''); setStatus('');
+    if (!videoForm.title.trim()) { setError('Нэр (тэмдэглэгээ) оруулна уу.'); return; }
+    if (!videoForm.youtubeId.trim()) { setError('YouTube линк эсвэл ID оруулна уу.'); return; }
+
+    setVideosSaving(true);
+    const payload = { ...videoForm, id: selectedVideoId ?? undefined };
+
+    const res = await fetch('/api/admin/videos', {
+      method: selectedVideoId ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const json = await res.json().catch(() => null);
+    setVideosSaving(false);
+
+    if (!res.ok) { setError(json?.message ?? 'Хадгалах үед алдаа гарлаа.'); return; }
+
+    setVideos(json.videos ?? []);
+    setSelectedVideoId(json.video?.id ?? null);
+    if (json.video) setVideoForm(toVideoForm(json.video));
+    setStatus(selectedVideoId ? 'Видео шинэчлэгдлээ.' : 'Шинэ видео нэмэгдлээ.');
+  };
+
+  const deleteVideoItem = (video: Video) => {
+    askConfirm(`"${video.title}" видеог устгах уу?`, async () => {
+      closeConfirm();
+      setError(''); setStatus('');
+      const res = await fetch(`/api/admin/videos?id=${video.id}`, { method: 'DELETE' });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) { setError(json?.message ?? 'Устгах үед алдаа гарлаа.'); return; }
+      setVideos(json.videos ?? []);
+      if (selectedVideoId === video.id) resetVideoForm();
+      setStatus('Видео устгагдлаа.');
+    });
+  };
+
   const tabStyle = (t: Tab) => ({
     padding: '8px 20px',
     border: 'none',
@@ -553,6 +670,8 @@ export default function AdminPage() {
     cursor: 'pointer',
     fontSize: 14,
     transition: 'color 0.15s',
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
   } as React.CSSProperties);
 
   return (
@@ -575,12 +694,15 @@ export default function AdminPage() {
           {tab === 'ads' && (
             <button className="admin-secondary" type="button" onClick={resetAdForm}>Шинэ сурталчилгаа</button>
           )}
+          {tab === 'videos' && (
+            <button className="admin-secondary" type="button" onClick={resetVideoForm}>Шинэ видео</button>
+          )}
           <button className="admin-secondary" type="button" onClick={logout}>Гарах</button>
         </div>
       </div>
 
       {/* Табууд */}
-      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid #e4e7eb', marginBottom: 24 }}>
+      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid #e4e7eb', marginBottom: 24, overflowX: 'auto', scrollbarWidth: 'none' }}>
         <button style={tabStyle('articles')} type="button" onClick={() => { setTab('articles'); setError(''); setStatus(''); }}>
           Мэдээ
         </button>
@@ -592,6 +714,9 @@ export default function AdminPage() {
         </button>
         <button style={tabStyle('ads')} type="button" onClick={() => { setTab('ads'); setError(''); setStatus(''); }}>
           Сурталчилгаа
+        </button>
+        <button style={tabStyle('videos')} type="button" onClick={() => { setTab('videos'); setError(''); setStatus(''); }}>
+          Видео
         </button>
       </div>
 
@@ -945,7 +1070,9 @@ export default function AdminPage() {
                   onClick={() => { setSelectedAmbIdx(idx); setAmbForm(amb); setError(''); setStatus(''); }}
                 >
                   <div className="admin-list-thumb" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
-                    🌐
+                    {(amb as any).image
+                      ? <img src={(amb as any).image} alt={amb.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
+                      : '🌐'}
                   </div>
                   <div className="admin-list-text">
                     <span>{amb.name}</span>
@@ -1153,6 +1280,98 @@ export default function AdminPage() {
             <div className="admin-submit">
               <button className="admin-primary" type="button" onClick={saveAd} disabled={adsSaving}>
                 {adsSaving ? 'Хадгалж байна...' : 'Хадгалах'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── ВИДЕО ── */}
+      {tab === 'videos' && (
+        <div className="admin-grid">
+          <aside className="admin-list">
+            <div className="admin-count">{videos.length} видео</div>
+            <div className="admin-list-items" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {videosLoading ? (
+                <p className="admin-muted">Уншиж байна...</p>
+              ) : (
+                videos.map(video => (
+                  <button
+                    key={video.id}
+                    className={`admin-list-item ${selectedVideoId === video.id ? 'active' : ''}`}
+                    type="button"
+                    onClick={() => editVideo(video)}
+                  >
+                    <div className="admin-list-thumb">
+                      <img
+                        src={`https://img.youtube.com/vi/${video.youtubeId}/mqdefault.jpg`}
+                        alt={video.title}
+                        onError={e => (e.currentTarget.style.display = 'none')}
+                      />
+                    </div>
+                    <div className="admin-list-text">
+                      <span>{video.title}</span>
+                      <small>{video.active ? 'Идэвхтэй' : 'Идэвхгүй'}</small>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </aside>
+
+          <div className="admin-editor">
+            <div className="admin-editor-head">
+              <div>
+                <span className="admin-kicker">{selectedVideo ? `#${selectedVideo.id}` : 'Шинэ'}</span>
+                <h2>{selectedVideo ? 'Видео засах' : 'Видео нэмэх'}</h2>
+              </div>
+              {selectedVideo && (
+                <button className="admin-danger" type="button" onClick={() => deleteVideoItem(selectedVideo)}>
+                  Устгах
+                </button>
+              )}
+            </div>
+
+            <div className="admin-fields">
+              <label className="wide">
+                Нэр (зөвхөн admin-д харагдана)
+                <input value={videoForm.title} onChange={e => setVideoForm(f => ({ ...f, title: e.target.value }))} />
+              </label>
+              <label className="admin-check">
+                <input
+                  type="checkbox"
+                  checked={videoForm.active}
+                  onChange={e => setVideoForm(f => ({ ...f, active: e.target.checked }))}
+                />
+                Идэвхтэй (вэбсайт дээр харагдана)
+              </label>
+              <label className="wide">
+                YouTube линк эсвэл видео ID
+                <input
+                  value={videoForm.youtubeId}
+                  onChange={e => setVideoForm(f => ({ ...f, youtubeId: e.target.value }))}
+                  placeholder="https://www.youtube.com/watch?v=... эсвэл dQw4w9WgXcQ"
+                />
+              </label>
+              {videoForm.youtubeId && (
+                <div className="wide" style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${extractYoutubeIdClient(videoForm.youtubeId)}`}
+                    title="preview"
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              )}
+            </div>
+
+            {error && <p className="admin-error">{error}</p>}
+            {status && <p className="admin-success">{status}</p>}
+
+            <div className="admin-submit">
+              <button className="admin-primary" type="button" onClick={saveVideo} disabled={videosSaving}>
+                {videosSaving ? 'Хадгалж байна...' : 'Хадгалах'}
               </button>
             </div>
           </div>

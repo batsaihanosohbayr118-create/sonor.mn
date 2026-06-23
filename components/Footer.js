@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="wrap">
         <div className="fcols">
           <div>
-            <h5>Сонор.мн</h5>
+            <h5>sonornews.mn</h5>
             <p className="ftagline">Хараат бус улс төрийн мэдээ. Үнэн зөв мэдээллийг иргэдэд хүргэхийг эрхэмлэнэ.</p>
           </div>
           <div>
@@ -26,11 +26,11 @@ export default function Footer() {
           </div>
           <div>
             <h5>Дагах</h5>
-            <a>Facebook</a><a>X (Twitter)</a><a>YouTube</a><a>И-мэйл захиалга</a>
+            <a href="https://www.facebook.com/share/18S8xE4tLi/" target="_blank" rel="noopener noreferrer">Facebook</a><a href="https://x.com/SonorNews" target="_blank" rel="noopener noreferrer">X (Twitter)</a><a href="https://youtube.com/@sonornews" target="_blank" rel="noopener noreferrer">YouTube</a><a>И-мэйл захиалга</a>
           </div>
         </div>
         <div className="fbottom">
-          <span>© 2026 Сонор.мн. Бүх эрх хуулиар хамгаалагдсан.</span>
+          <span>© 2026 sonornews.mn. Бүх эрх хуулиар хамгаалагдсан.</span>
           <span className="badge">Хэвлэл мэдээллийн зөвлөлийн зарчмыг мөрддөг</span>
         </div>
       </div>

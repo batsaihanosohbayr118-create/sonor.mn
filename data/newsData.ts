@@ -155,3 +155,10 @@ export const SEED_AMB = [
 ];
 
 export const getArticleById = (id: number) => ARTICLES.find(a => a.id === id);
+
+export interface Video {
+  id: number;
+  youtubeId: string;   // YouTube видеоны ID, ж: "dQw4w9WgXcQ"
+  title: string;
+  active: boolean;
+}
