@@ -1,13 +1,15 @@
 import React from 'react';
-import { Article, Ad } from '@/data/newsData';
+import { Article, Ad, Video } from '@/data/newsData';
 import HeroArticle from '@/components/HeroArticle';
 import ArticleCard from '@/components/ArticleCard';
 import FeaturedList from '@/components/FeaturedList';
 import FactCheckCard from '@/components/FactCheckCard';
 import PollCard from '@/components/PollCard';
 import AdBanner from '@/components/AdBanner';
+import VideoSidebar from '@/components/VideoSidebar';
 import { getArticles, getFeaturedArticles } from '@/lib/articlesStore';
 import { getActiveAds } from '@/lib/adsStore';
+import { getActiveVideos } from '@/lib/videosStore';
 import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
 export const getServerSideProps: GetServerSideProps<{
@@ -15,6 +17,7 @@ export const getServerSideProps: GetServerSideProps<{
   politicsArticles: Article[];
   featuredArticles: Article[];
   ads: Ad[];
+  videos: Video[];
 }> = async () => {
   const articles = await getArticles();
   const heroArticle = articles.find(article => article.featured) ?? articles[0] ?? null;
@@ -28,13 +31,14 @@ export const getServerSideProps: GetServerSideProps<{
       politicsArticles,
       featuredArticles: getFeaturedArticles(articles),
       ads: await getActiveAds(),
+      videos: await getActiveVideos(),
     },
   };
 };
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>;
 
-export default function HomePage({ heroArticle, politicsArticles, featuredArticles, ads }: Props) {
+export default function HomePage({ heroArticle, politicsArticles, featuredArticles, ads, videos }: Props) {
   return (
     <div className="grid">
       <div>
@@ -55,6 +59,9 @@ export default function HomePage({ heroArticle, politicsArticles, featuredArticl
         <FeaturedList featuredArticles={featuredArticles} />
         <FactCheckCard />
         <PollCard />
+      </aside>
+      <aside className="videoside">
+        <VideoSidebar videos={videos} />
       </aside>
     </div>
   );
