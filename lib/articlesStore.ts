@@ -1,34 +1,18 @@
-import fs from 'fs/promises';
-import path from 'path';
+import { connectDB } from '@/lib/mongodb';
+import ArticleModel from '@/models/Article';
 import { ARTICLES, CATS, FEATURED, Article } from '@/data/newsData';
 
-const articlesPath = path.join(process.cwd(), 'data', 'articles.json');
-
-const readStoredArticles = async () => {
-  try {
-    const raw = await fs.readFile(articlesPath, 'utf8');
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as Article[]) : null;
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code;
-    if (code === 'ENOENT') return null;
-    throw error;
-  }
+export const getArticles = async (): Promise<Article[]> => {
+  await connectDB();
+  const docs = await ArticleModel.find().sort({ createdAt: -1 }).lean();
+  if (docs.length > 0) return docs as unknown as Article[];
+  return ARTICLES; // MongoDB хоосон бол seed data буцаана
 };
 
-export const getArticles = async () => {
-  const stored = await readStoredArticles();
-  return stored ?? ARTICLES;
-};
-
-export const saveArticles = async (articles: Article[]) => {
-  await fs.mkdir(path.dirname(articlesPath), { recursive: true });
-  await fs.writeFile(articlesPath, `${JSON.stringify(articles, null, 2)}\n`, 'utf8');
-};
-
-export const getArticleById = async (id: number) => {
-  const articles = await getArticles();
-  return articles.find(article => article.id === id) ?? null;
+export const getArticleById = async (id: number): Promise<Article | null> => {
+  await connectDB();
+  const doc = await ArticleModel.findOne({ id }).lean();
+  return doc ? (doc as unknown as Article) : null;
 };
 
 export const getFeaturedArticles = (articles: Article[]) => {
