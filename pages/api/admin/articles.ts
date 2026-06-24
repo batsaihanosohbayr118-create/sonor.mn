@@ -7,24 +7,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'GET') {
     const articles = await Article.find().sort({ createdAt: -1 });
-    return res.status(200).json(articles);
+    return res.status(200).json({ articles });
   }
 
   if (req.method === 'POST') {
     const article = await Article.create(req.body);
-    return res.status(201).json(article);
+    const articles = await Article.find().sort({ createdAt: -1 });
+    return res.status(201).json({ article, articles });
   }
 
   if (req.method === 'PUT') {
     const { id, ...data } = req.body;
     const article = await Article.findByIdAndUpdate(id, data, { new: true });
-    return res.status(200).json(article);
+    const articles = await Article.find().sort({ createdAt: -1 });
+    return res.status(200).json({ article, articles });
   }
 
   if (req.method === 'DELETE') {
-    const { id } = req.body;
+    const { id } = req.query; // ← req.body биш req.query!
     await Article.findByIdAndDelete(id);
-    return res.status(200).json({ success: true });
+    const articles = await Article.find().sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, articles });
   }
 
   res.status(405).end();
