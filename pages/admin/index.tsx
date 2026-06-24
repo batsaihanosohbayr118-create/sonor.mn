@@ -1,11 +1,12 @@
 import React, { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import type { GetServerSideProps } from 'next';
-import { CATS, Article, SEED_MPS, SEED_AMB, MP, Ad, Video } from '@/data/newsData';
+import { CATS, Article, MP, Ad, Video } from '@/data/newsData';
+import { Fact } from '@/lib/factsStore';
 import { isAdminRequest } from '@/lib/adminAuth';
 import ConfirmModal from '@/components/ConfirmModal';
 
-type Tab = 'articles' | 'mps' | 'ambassadors' | 'ads' | 'videos';
+type Tab = 'articles' | 'mps' | 'ambassadors' | 'ads' | 'videos' | 'facts';
 
 type ArticleForm = {
   id?: number;
@@ -41,6 +42,13 @@ type VideoForm = {
   active: boolean;
 };
 
+type FactForm = {
+  claim: string;
+  verdict: 'true' | 'false' | 'half';
+  vlabel: string;
+  exp: string;
+};
+
 const emptyAdForm: AdForm = {
   title: '',
   image: '',
@@ -52,6 +60,13 @@ const emptyVideoForm: VideoForm = {
   title: '',
   youtubeId: '',
   active: true,
+};
+
+const emptyFactForm: FactForm = {
+  claim: '',
+  verdict: 'half',
+  vlabel: '',
+  exp: '',
 };
 
 const emptyForm: ArticleForm = {
@@ -120,10 +135,19 @@ const toVideoForm = (video: Video): VideoForm => ({
   active: video.active,
 });
 
-// Preview-д ашиглах туслах функц — videosStore.ts дотор байгаа
-// extractYoutubeId-ийн ХУУЛБАР (серверийн логиктой ижил байх ёстой).
-// Хэрэглэгч бүтэн линк (playlist/timestamp параметртэй ч) буулгасан үед
-// preview iframe-д зөв embed URL харуулахын тулд хэрэгтэй.
+const toFactForm = (fact: Fact): FactForm => ({
+  claim: fact.claim,
+  verdict: fact.verdict,
+  vlabel: fact.vlabel,
+  exp: fact.exp,
+});
+
+const VERDICT_OPTIONS = [
+  { value: 'true', label: 'Үнэн' },
+  { value: 'half', label: 'Хагас үнэн' },
+  { value: 'false', label: 'Худал' },
+];
+
 const extractYoutubeIdClient = (input: string): string => {
   const trimmed = input.trim();
   if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
@@ -339,14 +363,18 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
 
   // --- УИХ-ын гишүүд ---
-  const [mps, setMps] = useState<MP[]>(SEED_MPS);
+  const [mps, setMps] = useState<MP[]>([]);
   const [mpForm, setMpForm] = useState<Partial<MP>>(emptyMpForm);
   const [selectedMpId, setSelectedMpId] = useState<number | null>(null);
+  const [mpsLoading, setMpsLoading] = useState(true);
+  const [mpsSaving, setMpsSaving] = useState(false);
 
   // --- Элчин сайд ---
-  const [ambassadors, setAmbassadors] = useState(SEED_AMB);
+  const [ambassadors, setAmbassadors] = useState<AmbForm[]>([]);
   const [ambForm, setAmbForm] = useState<AmbForm>(emptyAmbForm);
   const [selectedAmbIdx, setSelectedAmbIdx] = useState<number | null>(null);
+  const [ambsLoading, setAmbsLoading] = useState(true);
+  const [ambsSaving, setAmbsSaving] = useState(false);
 
   // --- Сурталчилгаа ---
   const [ads, setAds] = useState<Ad[]>([]);
@@ -361,6 +389,13 @@ export default function AdminPage() {
   const [selectedVideoId, setSelectedVideoId] = useState<number | null>(null);
   const [videosLoading, setVideosLoading] = useState(true);
   const [videosSaving, setVideosSaving] = useState(false);
+
+  // --- Баримт шалгах ---
+  const [facts, setFacts] = useState<Fact[]>([]);
+  const [factForm, setFactForm] = useState<FactForm>(emptyFactForm);
+  const [selectedFactId, setSelectedFactId] = useState<number | null>(null);
+  const [factsLoading, setFactsLoading] = useState(true);
+  const [factsSaving, setFactsSaving] = useState(false);
 
   // --- Устгах баталгаажуулах modal ---
   const [confirmState, setConfirmState] = useState<{ message: string; onConfirm: () => void } | null>(null);
@@ -387,6 +422,11 @@ export default function AdminPage() {
     [videos, selectedVideoId],
   );
 
+  const selectedFact = useMemo(
+    () => facts.find(f => f.id === selectedFactId) ?? null,
+    [facts, selectedFactId],
+  );
+
   const filteredArticles = useMemo(() => {
     const value = query.toLowerCase().trim();
     if (!value) return articles;
@@ -406,6 +446,30 @@ export default function AdminPage() {
   };
 
   useEffect(() => { loadArticles(); }, []);
+
+  // --- УИХ гишүүн API ---
+  const loadMps = async () => {
+    setMpsLoading(true);
+    const res = await fetch('/api/admin/mps');
+    setMpsLoading(false);
+    if (res.status === 401) { router.replace('/admin/login'); return; }
+    const json = await res.json();
+    setMps(json.mps ?? []);
+  };
+
+  useEffect(() => { loadMps(); }, []);
+
+  // --- Элчин сайд API ---
+  const loadAmbassadors = async () => {
+    setAmbsLoading(true);
+    const res = await fetch('/api/admin/ambassadors');
+    setAmbsLoading(false);
+    if (res.status === 401) { router.replace('/admin/login'); return; }
+    const json = await res.json();
+    setAmbassadors(json.ambassadors ?? []);
+  };
+
+  useEffect(() => { loadAmbassadors(); }, []);
 
   const loadAds = async () => {
     setAdsLoading(true);
@@ -428,6 +492,17 @@ export default function AdminPage() {
   };
 
   useEffect(() => { loadVideos(); }, []);
+
+  const loadFacts = async () => {
+    setFactsLoading(true);
+    const res = await fetch('/api/admin/facts');
+    setFactsLoading(false);
+    if (res.status === 401) { router.replace('/admin/login'); return; }
+    const json = await res.json();
+    setFacts(json.facts ?? []);
+  };
+
+  useEffect(() => { loadFacts(); }, []);
 
   const updateField = <K extends keyof ArticleForm>(key: K, value: ArticleForm[K]) => {
     setForm(cur => ({ ...cur, [key]: value }));
@@ -494,25 +569,37 @@ export default function AdminPage() {
     router.replace('/admin/login');
   };
 
-  // --- УИХ-ын гишүүн handlers ---
-  const saveMp = () => {
+  // --- УИХ-ын гишүүн handlers (API) ---
+  const saveMp = async () => {
     setError(''); setStatus('');
     if (!mpForm.name?.trim()) { setError('Нэрийг оруулна уу.'); return; }
-    if (selectedMpId !== null) {
-      setMps(prev => prev.map(m => m.id === selectedMpId ? { ...m, ...mpForm } as MP : m));
-      setStatus('Гишүүн шинэчлэгдлээ.');
-    } else {
-      const newId = Math.max(0, ...mps.map(m => m.id)) + 1;
-      setMps(prev => [...prev, { ...mpForm, id: newId } as MP]);
-      setSelectedMpId(newId);
-      setStatus('Шинэ гишүүн нэмэгдлээ.');
-    }
+    setMpsSaving(true);
+
+    const res = await fetch('/api/admin/mps', {
+      method: selectedMpId !== null ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...mpForm, id: selectedMpId ?? undefined }),
+    });
+
+    const json = await res.json().catch(() => null);
+    setMpsSaving(false);
+
+    if (!res.ok) { setError(json?.message ?? 'Хадгалах үед алдаа гарлаа.'); return; }
+
+    setMps(json.mps ?? []);
+    setSelectedMpId(json.mp?.id ?? null);
+    if (json.mp) setMpForm(json.mp);
+    setStatus(selectedMpId !== null ? 'Гишүүн шинэчлэгдлээ.' : 'Шинэ гишүүн нэмэгдлээ.');
   };
 
   const deleteMp = () => {
-    askConfirm(`"${mpForm.name}" гишүүнийг устгах уу?`, () => {
+    askConfirm(`"${mpForm.name}" гишүүнийг устгах уу?`, async () => {
       closeConfirm();
-      setMps(prev => prev.filter(m => m.id !== selectedMpId));
+      setError(''); setStatus('');
+      const res = await fetch(`/api/admin/mps?id=${selectedMpId}`, { method: 'DELETE' });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) { setError(json?.message ?? 'Устгах үед алдаа гарлаа.'); return; }
+      setMps(json.mps ?? []);
       setSelectedMpId(null);
       setMpForm(emptyMpForm);
       setStatus('Гишүүн устгагдлаа.');
@@ -525,27 +612,46 @@ export default function AdminPage() {
     setError(''); setStatus('');
   };
 
-  // --- Элчин сайд handlers ---
-  const saveAmb = () => {
+  // --- Элчин сайд handlers (API) ---
+  const saveAmb = async () => {
     setError(''); setStatus('');
     if (!ambForm.name?.trim() || !ambForm.country?.trim()) {
       setError('Нэр болон улсыг оруулна уу.');
       return;
     }
-    if (selectedAmbIdx !== null) {
-      setAmbassadors(prev => prev.map((a, i) => i === selectedAmbIdx ? ambForm : a));
-      setStatus('Элчин сайд шинэчлэгдлээ.');
-    } else {
-      setAmbassadors(prev => [...prev, ambForm]);
-      setSelectedAmbIdx(ambassadors.length);
-      setStatus('Шинэ элчин сайд нэмэгдлээ.');
+    setAmbsSaving(true);
+
+    const res = await fetch(
+      selectedAmbIdx !== null
+        ? `/api/admin/ambassadors?idx=${selectedAmbIdx}`
+        : '/api/admin/ambassadors',
+      {
+        method: selectedAmbIdx !== null ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ambForm),
+      }
+    );
+
+    const json = await res.json().catch(() => null);
+    setAmbsSaving(false);
+
+    if (!res.ok) { setError(json?.message ?? 'Хадгалах үед алдаа гарлаа.'); return; }
+
+    setAmbassadors(json.ambassadors ?? []);
+    if (selectedAmbIdx === null) {
+      setSelectedAmbIdx((json.ambassadors ?? []).length - 1);
     }
+    setStatus(selectedAmbIdx !== null ? 'Элчин сайд шинэчлэгдлээ.' : 'Шинэ элчин сайд нэмэгдлээ.');
   };
 
   const deleteAmb = () => {
-    askConfirm(`"${ambForm.name}" элчин сайдыг устгах уу?`, () => {
+    askConfirm(`"${ambForm.name}" элчин сайдыг устгах уу?`, async () => {
       closeConfirm();
-      setAmbassadors(prev => prev.filter((_, i) => i !== selectedAmbIdx));
+      setError(''); setStatus('');
+      const res = await fetch(`/api/admin/ambassadors?idx=${selectedAmbIdx}`, { method: 'DELETE' });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) { setError(json?.message ?? 'Устгах үед алдаа гарлаа.'); return; }
+      setAmbassadors(json.ambassadors ?? []);
       setSelectedAmbIdx(null);
       setAmbForm(emptyAmbForm);
       setStatus('Элчин сайд устгагдлаа.');
@@ -660,6 +766,57 @@ export default function AdminPage() {
     });
   };
 
+  // --- Баримт шалгах handlers ---
+  const resetFactForm = () => {
+    setSelectedFactId(null);
+    setFactForm(emptyFactForm);
+    setError(''); setStatus('');
+  };
+
+  const editFact = (fact: Fact) => {
+    setSelectedFactId(fact.id);
+    setFactForm(toFactForm(fact));
+    setError(''); setStatus('');
+  };
+
+  const saveFact = async () => {
+    setError(''); setStatus('');
+    if (!factForm.claim.trim()) { setError('Мэдэгдлийг оруулна уу.') ; return; }
+    if (!factForm.vlabel.trim()) { setError('Шошгыг оруулна уу.'); return; }
+
+    setFactsSaving(true);
+    const payload = { ...factForm, id: selectedFactId ?? undefined };
+
+    const res = await fetch('/api/admin/facts', {
+      method: selectedFactId ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const json = await res.json().catch(() => null);
+    setFactsSaving(false);
+
+    if (!res.ok) { setError(json?.message ?? 'Хадгалах үед алдаа гарлаа.'); return; }
+
+    setFacts(json.facts ?? []);
+    setSelectedFactId(json.fact?.id ?? null);
+    if (json.fact) setFactForm(toFactForm(json.fact));
+    setStatus(selectedFactId ? 'Баримт шинэчлэгдлээ.' : 'Шинэ баримт нэмэгдлээ.');
+  };
+
+  const deleteFact = (fact: Fact) => {
+    askConfirm(`"${fact.vlabel}" баримтыг устгах уу?`, async () => {
+      closeConfirm();
+      setError(''); setStatus('');
+      const res = await fetch(`/api/admin/facts?id=${fact.id}`, { method: 'DELETE' });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) { setError(json?.message ?? 'Устгах үед алдаа гарлаа.'); return; }
+      setFacts(json.facts ?? []);
+      if (selectedFactId === fact.id) resetFactForm();
+      setStatus('Баримт устгагдлаа.');
+    });
+  };
+
   const tabStyle = (t: Tab) => ({
     padding: '8px 20px',
     border: 'none',
@@ -697,6 +854,9 @@ export default function AdminPage() {
           {tab === 'videos' && (
             <button className="admin-secondary" type="button" onClick={resetVideoForm}>Шинэ видео</button>
           )}
+          {tab === 'facts' && (
+            <button className="admin-secondary" type="button" onClick={resetFactForm}>Шинэ баримт</button>
+          )}
           <button className="admin-secondary" type="button" onClick={logout}>Гарах</button>
         </div>
       </div>
@@ -717,6 +877,9 @@ export default function AdminPage() {
         </button>
         <button style={tabStyle('videos')} type="button" onClick={() => { setTab('videos'); setError(''); setStatus(''); }}>
           Видео
+        </button>
+        <button style={tabStyle('facts')} type="button" onClick={() => { setTab('facts'); setError(''); setStatus(''); }}>
+          Баримт шалгах
         </button>
       </div>
 
@@ -867,24 +1030,28 @@ export default function AdminPage() {
           <aside className="admin-list">
             <div className="admin-count">{mps.length} гишүүн</div>
             <div className="admin-list-items" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-              {mps.map(mp => (
-                <button
-                  key={mp.id}
-                  className={`admin-list-item ${selectedMpId === mp.id ? 'active' : ''}`}
-                  type="button"
-                  onClick={() => { setSelectedMpId(mp.id); setMpForm(mp); setError(''); setStatus(''); }}
-                >
-                  <div className="admin-list-thumb">
-                    {mp.image
-                      ? <img src={mp.image} alt={mp.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <span>👤</span>}
-                  </div>
-                  <div className="admin-list-text">
-                    <span>{mp.name}</span>
-                    <small>{mp.party} · {mp.district}</small>
-                  </div>
-                </button>
-              ))}
+              {mpsLoading ? (
+                <p className="admin-muted">Уншиж байна...</p>
+              ) : (
+                mps.map(mp => (
+                  <button
+                    key={mp.id}
+                    className={`admin-list-item ${selectedMpId === mp.id ? 'active' : ''}`}
+                    type="button"
+                    onClick={() => { setSelectedMpId(mp.id); setMpForm(mp); setError(''); setStatus(''); }}
+                  >
+                    <div className="admin-list-thumb">
+                      {mp.image
+                        ? <img src={mp.image} alt={mp.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <span>👤</span>}
+                    </div>
+                    <div className="admin-list-text">
+                      <span>{mp.name}</span>
+                      <small>{mp.party} · {mp.district}</small>
+                    </div>
+                  </button>
+                ))
+              )}
             </div>
           </aside>
 
@@ -1050,7 +1217,9 @@ export default function AdminPage() {
             {status && <p className="admin-success">{status}</p>}
 
             <div className="admin-submit">
-              <button className="admin-primary" type="button" onClick={saveMp}>Хадгалах</button>
+              <button className="admin-primary" type="button" onClick={saveMp} disabled={mpsSaving}>
+                {mpsSaving ? 'Хадгалж байна...' : 'Хадгалах'}
+              </button>
             </div>
           </div>
         </div>
@@ -1062,24 +1231,28 @@ export default function AdminPage() {
           <aside className="admin-list">
             <div className="admin-count">{ambassadors.length} элчин сайд</div>
             <div className="admin-list-items" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-              {ambassadors.map((amb, idx) => (
-                <button
-                  key={idx}
-                  className={`admin-list-item ${selectedAmbIdx === idx ? 'active' : ''}`}
-                  type="button"
-                  onClick={() => { setSelectedAmbIdx(idx); setAmbForm(amb); setError(''); setStatus(''); }}
-                >
-                  <div className="admin-list-thumb" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
-                    {(amb as any).image
-                      ? <img src={(amb as any).image} alt={amb.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
-                      : '🌐'}
-                  </div>
-                  <div className="admin-list-text">
-                    <span>{amb.name}</span>
-                    <small>{amb.country} · {amb.city}</small>
-                  </div>
-                </button>
-              ))}
+              {ambsLoading ? (
+                <p className="admin-muted">Уншиж байна...</p>
+              ) : (
+                ambassadors.map((amb, idx) => (
+                  <button
+                    key={idx}
+                    className={`admin-list-item ${selectedAmbIdx === idx ? 'active' : ''}`}
+                    type="button"
+                    onClick={() => { setSelectedAmbIdx(idx); setAmbForm(amb); setError(''); setStatus(''); }}
+                  >
+                    <div className="admin-list-thumb" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>
+                      {amb.image
+                        ? <img src={amb.image} alt={amb.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.currentTarget.style.display = 'none'; }} />
+                        : '🌐'}
+                    </div>
+                    <div className="admin-list-text">
+                      <span>{amb.name}</span>
+                      <small>{amb.country} · {amb.city}</small>
+                    </div>
+                  </button>
+                ))
+              )}
             </div>
           </aside>
 
@@ -1115,7 +1288,7 @@ export default function AdminPage() {
                   onChange={v => setAmbForm(f => ({ ...f, role: v }))}
                 />
               </label>
-              <label>
+              <label className="wide">
                 Зураг URL
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <input
@@ -1161,7 +1334,9 @@ export default function AdminPage() {
             {status && <p className="admin-success">{status}</p>}
 
             <div className="admin-submit">
-              <button className="admin-primary" type="button" onClick={saveAmb}>Хадгалах</button>
+              <button className="admin-primary" type="button" onClick={saveAmb} disabled={ambsSaving}>
+                {ambsSaving ? 'Хадгалж байна...' : 'Хадгалах'}
+              </button>
             </div>
           </div>
         </div>
@@ -1372,6 +1547,95 @@ export default function AdminPage() {
             <div className="admin-submit">
               <button className="admin-primary" type="button" onClick={saveVideo} disabled={videosSaving}>
                 {videosSaving ? 'Хадгалж байна...' : 'Хадгалах'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── БАРИМТ ШАЛГАХ ── */}
+      {tab === 'facts' && (
+        <div className="admin-grid">
+          <aside className="admin-list">
+            <div className="admin-count">{facts.length} баримт</div>
+            <div className="admin-list-items" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {factsLoading ? (
+                <p className="admin-muted">Уншиж байна...</p>
+              ) : (
+                facts.map(fact => (
+                  <button
+                    key={fact.id}
+                    className={`admin-list-item ${selectedFactId === fact.id ? 'active' : ''}`}
+                    type="button"
+                    onClick={() => editFact(fact)}
+                  >
+                    <div className="admin-list-thumb">
+                      <span>{fact.verdict === 'true' ? '✅' : fact.verdict === 'false' ? '❌' : '⚠️'}</span>
+                    </div>
+                    <div className="admin-list-text">
+                      <span>{fact.vlabel}</span>
+                      <small>{fact.claim.slice(0, 40)}...</small>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </aside>
+
+          <div className="admin-editor">
+            <div className="admin-editor-head">
+              <div>
+                <span className="admin-kicker">{selectedFact ? `#${selectedFact.id}` : 'Шинэ'}</span>
+                <h2>{selectedFact ? 'Баримт засах' : 'Баримт нэмэх'}</h2>
+              </div>
+              {selectedFact && (
+                <button className="admin-danger" type="button" onClick={() => deleteFact(selectedFact)}>
+                  Устгах
+                </button>
+              )}
+            </div>
+
+            <div className="admin-fields">
+              <label className="wide">
+                Мэдэгдэл (claim)
+                <textarea
+                  value={factForm.claim}
+                  onChange={e => setFactForm(f => ({ ...f, claim: e.target.value }))}
+                  rows={3}
+                />
+              </label>
+              <label>
+                Дүгнэлт
+                <SimpleSelect
+                  value={factForm.verdict}
+                  onChange={v => setFactForm(f => ({ ...f, verdict: v as FactForm['verdict'] }))}
+                  options={VERDICT_OPTIONS}
+                />
+              </label>
+              <label>
+                Шошго (vlabel)
+                <input
+                  value={factForm.vlabel}
+                  onChange={e => setFactForm(f => ({ ...f, vlabel: e.target.value }))}
+                  placeholder="Үнэн / Худал / Хагас үнэн"
+                />
+              </label>
+              <label className="wide">
+                Тайлбар (exp)
+                <textarea
+                  value={factForm.exp}
+                  onChange={e => setFactForm(f => ({ ...f, exp: e.target.value }))}
+                  rows={4}
+                />
+              </label>
+            </div>
+
+            {error && <p className="admin-error">{error}</p>}
+            {status && <p className="admin-success">{status}</p>}
+
+            <div className="admin-submit">
+              <button className="admin-primary" type="button" onClick={saveFact} disabled={factsSaving}>
+                {factsSaving ? 'Хадгалж байна...' : 'Хадгалах'}
               </button>
             </div>
           </div>

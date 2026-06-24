@@ -37,25 +37,11 @@ export const CATS: Record<string, Category> = {
   local: { label: 'Орон нутаг', color: 'navy', },
 };
 
-// Энэ хэсэг одоог хүртэл статик (гараар бичсэн) байна. 
 export const ARTICLES: Article[] = [
   { id: 4, cat: 'foreign', title: 'Гадаад айлчлалын хөтөлбөр зарлагдлаа', excerpt: 'Хоёр болон олон талт хамтын ажиллагааны хэлэлцээрүүд яригдана.', author: 'Б.Болд', time: '5 цагийн өмнө', body: ['Удахгүй болох албан ёсны айлчлалын хүрээнд эдийн засаг, худалдаа, дэд бүтцийн чиглэлийн хэд хэдэн хэлэлцээр яригдахаар хөтөлбөрт тусгагдсан байна.', 'Айлчлалын үр дүн, гарын үсэг зурах баримт бичгүүдийн талаар дэлгэрэнгүй мэдээллийг бид айлчлалын дараа нийтэлнэ.'], src: 'Эх сурвалж: Гадаад харилцааны яам' }
 ];
 
 export const FEATURED: number[] = [1, 6, 5, 8, 3];
-
-export interface Fact {
-  claim: string;
-  verdict: 'true' | 'false' | 'half';
-  vlabel: string;
-  exp: string;
-}
-
-export const FACTS: Fact[] = [
-  { claim: '«Энэ онд цалин 2 дахин нэмэгдсэн» гэх олон нийтэд тархсан мэдэгдэл', verdict: 'false', vlabel: 'Худал', exp: 'Албан ёсны статистикаар дундаж цалин тодорхой хувиар өссөн боловч хоёр дахин нэмэгдээгүй. Тоо баримтыг гуйвуулсан.' },
-  { claim: '«Төсвийн алдагдал түүхэн дээд хэмжээнд хүрсэн» гэх мэдэгдэл', verdict: 'half', vlabel: 'Хагас үнэн', exp: 'Нэрлэсэн дүнгээр алдагдал өндөр боловч ДНБ-д харьцуулсан хувиар авч үзвэл өмнөх жилүүдтэй ойролцоо түвшинд байна.' },
-  { claim: '«Шинэ хууль батлагдсан өдрөөсөө эхлэн хүчин төгөлдөр болно» гэх мэдээлэл', verdict: 'true', vlabel: 'Үнэн', exp: 'Хуульд хүчин төгөлдөр болох хугацааг тусгайлан заасан тул мэдэгдэл нийцэж байна.' }
-];
 
 export let POLL = { voted: false, yes: 0, no: 0 };
 
@@ -81,84 +67,11 @@ export interface MP {
   src?: string;
 }
 
-export const SEED_MPS: MP[] = [
-  {
-    id: 1,
-    name: 'Батхүүгийн Батбаяр',
-    party: 'МАН',
-    pcls: 'man',
-    district: '12-р тойрог, Баянзүрх',
-    committees: ['Төсвийн байнгын хороо', 'Эдийн засгийн байнгын хороо'],
-    position: 'УИХ-ын гишүүн',
-    electedYear: 2024,
-    image: 'https://via.placeholder.com/300x400',
-    gender: 'M',
-    bio: 'Эдийн засагч, эрх зүйч мэргэжилтэй. Төрийн албанд 15 жил ажилласан.',
-    education: ['МУИС, Эдийн засгийн сургууль', 'Харвардын их сургууль, Төрийн удирдлага'],
-    experience: ['Сант Марал сангийн судлаач', 'Сангийн яамны хэлтсийн дарга'],
-    attendance: 98.5,
-    laws: 12,
-    socials: { fb: 'https://facebook.com', x: 'https://twitter.com' },
-    contact: 'batbayar@parliament.mn',
-    isFeatured: true
-  },
-  {
-    id: 2,
-    name: 'Даваагийн Оюунчимэг',
-    party: 'АН',
-    pcls: 'an',
-    district: '5-р тойрог, Дархан-Уул',
-    committees: ['Нийгмийн бодлогын байнгын хороо'],
-    position: 'УИХ-ын гишүүн',
-    electedYear: 2024,
-    image: 'https://via.placeholder.com/300x400',
-    gender: 'F',
-    bio: 'Сэтгүүлч, нийгмийн зүтгэлтэн.',
-    education: ['МУИС, Сэтгүүл зүй'],
-    experience: ['МҮОНТ-ийн сэтгүүлч', 'Нийгмийн хөгжлийн сангийн тэргүүн'],
-    attendance: 94.2,
-    laws: 5,
-    socials: { fb: 'https://facebook.com' },
-    contact: 'oyunchimeg@parliament.mn'
-  },
-  // Бусад гишүүдийг энд нэмж болно...
-];
-
-export const SEED_AMB = [
-  { country: 'БНХАУ', city: 'Бээжин', name: 'Н.Энхболд', role: 'Элчин сайд' },
-  { country: 'ОХУ', city: 'Москва', name: 'Д.Даваа', role: 'Элчин сайд' },
-  { country: 'АНУ', city: 'Вашингтон', name: 'Ө.Батбаяр', role: 'Элчин сайд' },
-  { country: 'Япон', city: 'Токио', name: 'Б.Баярсайхан', role: 'Элчин сайд' },
-  { country: 'БНСУ', city: 'Сөүл', name: 'С.Сүхболд', role: 'Элчин сайд' },
-  { country: 'БНАСАУ', city: 'Пхеньян', name: 'Л.Эрдэнэдаваа', role: 'Элчин сайд' },
-  { country: 'Их Британи', city: 'Лондон', name: 'Б.Мөнхжин', role: 'Элчин сайд' },
-  { country: 'Герман', city: 'Берлин', name: 'Б.Мандахбилэг', role: 'Элчин сайд' },
-  { country: 'Франц', city: 'Париз', name: 'Н.Анхбаяр', role: 'Элчин сайд' },
-  { country: 'Бельги (ЕХ)', city: 'Брюссель', name: 'Л.Болд', role: 'Элчин сайд' },
-  { country: 'Швейцарь', city: 'Женев', name: 'П.Анхбаяр', role: 'Байнгын төлөөлөгч' },
-  { country: 'Австри', city: 'Вена', name: 'Г.Баттунгалаг', role: 'Элчин сайд' },
-  { country: 'Чех', city: 'Прага', name: 'Д.Гансүх', role: 'Элчин сайд' },
-  { country: 'Болгар', city: 'София', name: 'Л.Саянаа', role: 'Элчин сайд' },
-  { country: 'Турк', city: 'Анкара', name: 'Г.Мөнхбаяр', role: 'Элчин сайд' },
-  { country: 'Энэтхэг', city: 'Шинэ Дели', name: 'Л.Өлзийт', role: 'Элчин сайд' },
-  { country: 'Казахстан', city: 'Астана', name: 'Д.Баярхүү', role: 'Элчин сайд' },
-  { country: 'Кувейт', city: 'Кувейт', name: 'П.Сэргэлэн', role: 'Элчин сайд' },
-  { country: 'Вьетнам', city: 'Ханой', name: 'Ж.Сэрээжав', role: 'Элчин сайд' },
-  { country: 'Куба', city: 'Гавана', name: 'Ш.Батцэцэг', role: 'Элчин сайд' },
-  { country: 'Канад', city: 'Оттава', name: 'Э.Сарантогос', role: 'Элчин сайд' },
-  { country: 'Сингапур', city: 'Сингапур', name: 'Э.Булган', role: 'Элчин сайд' },
-  { country: 'БНХАУ', city: 'Эрээн', name: 'Д.Мөнх-Эрдэнэ', role: 'Ерөнхий консул' },
-  { country: 'БНХАУ', city: 'Хөх хот', name: 'Д.Ганхуяг', role: 'Ерөнхий консул' },
-  { country: 'АНУ', city: 'Сан Франциско', name: 'Д.Батжаргал', role: 'Ерөнхий консул' },
-  { country: 'ОХУ', city: 'Эрхүү', name: 'Б.Энхтүвшин', role: 'Ерөнхий консул' },
-  { country: 'Турк', city: 'Истанбул', name: 'Ч.Мөнгөндалай', role: 'Ерөнхий консул' }
-];
-
 export const getArticleById = (id: number) => ARTICLES.find(a => a.id === id);
 
 export interface Video {
   id: number;
-  youtubeId: string;   // YouTube видеоны ID, ж: "dQw4w9WgXcQ"
+  youtubeId: string;
   title: string;
   active: boolean;
 }

@@ -1,16 +1,33 @@
-import React, { useState } from 'react';
-import { SEED_MPS, SEED_AMB } from '@/data/newsData';
+import React, { useState, useEffect } from 'react';
+import { MP } from '@/data/newsData';
+import { AmbassadorRecord } from '@/lib/ambassadorsStore';
 
-type MP = typeof SEED_MPS[0];
-type Amb = typeof SEED_AMB[0];
+type Amb = AmbassadorRecord;
 
 export default function People() {
   const [view, setView] = useState<'members' | 'ambassadors'>('members');
   const [selectedMP, setSelectedMP] = useState<MP | null>(null);
   const [selectedAmb, setSelectedAmb] = useState<Amb | null>(null);
 
-  const members = view === 'members' ? SEED_MPS : [];
-  const amb = view === 'ambassadors' ? SEED_AMB : [];
+  const [mps, setMps] = useState<MP[]>([]);
+  const [ambassadors, setAmbassadors] = useState<Amb[]>([]);
+
+  useEffect(() => {
+    fetch('/api/admin/mps')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.mps) setMps(d.mps); })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/admin/ambassadors')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.ambassadors) setAmbassadors(d.ambassadors); })
+      .catch(() => {});
+  }, []);
+
+  const members = view === 'members' ? mps : [];
+  const amb = view === 'ambassadors' ? ambassadors : [];
 
   return (
     <>
@@ -22,7 +39,12 @@ export default function People() {
       <div className="people-grid">
         {members.map((mp, idx) => (
           <div className="pcard" key={`${mp.name}-${idx}`} style={{ cursor: 'pointer' }} onClick={() => setSelectedMP(mp)}>
-            <div className="pavatar">{mp.name.slice(0, 2)}</div>
+            <div className="pavatar" style={{ overflow: 'hidden', padding: 0 }}>
+              {mp.image
+                ? <img src={mp.image} alt={mp.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : mp.name.slice(0, 2)
+              }
+            </div>
             <div>
               <div className="pname">{mp.name}</div>
               <div className="prole">{mp.party} · {mp.district}</div>
@@ -33,7 +55,12 @@ export default function People() {
 
         {amb.map((a, idx) => (
           <div className="pcard" key={'amb-' + idx} style={{ cursor: 'pointer' }} onClick={() => setSelectedAmb(a)}>
-            <div className="pavatar">{a.country.slice(0, 2)}</div>
+            <div className="pavatar" style={{ overflow: 'hidden', padding: 0 }}>
+              {a.image
+                ? <img src={a.image} alt={a.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : a.country.slice(0, 2)
+              }
+            </div>
             <div>
               <div className="pname">{a.name || a.country}</div>
               <div className="prole">{a.role} · {a.city}</div>
@@ -53,8 +80,11 @@ export default function People() {
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                <div className="pavatar" style={{ width: 56, height: 56, fontSize: 18, minWidth: 56 }}>
-                  {selectedMP.name.slice(0, 2)}
+                <div className="pavatar" style={{ width: 56, height: 56, fontSize: 18, minWidth: 56, overflow: 'hidden', padding: 0 }}>
+                  {selectedMP.image
+                    ? <img src={selectedMP.image} alt={selectedMP.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : selectedMP.name.slice(0, 2)
+                  }
                 </div>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: '18px', marginBottom: 4 }}>{selectedMP.name}</div>
@@ -122,8 +152,11 @@ export default function People() {
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                <div className="pavatar" style={{ width: 56, height: 56, fontSize: 18, minWidth: 56 }}>
-                  {selectedAmb.country.slice(0, 2)}
+                <div className="pavatar" style={{ width: 56, height: 56, fontSize: 18, minWidth: 56, overflow: 'hidden', padding: 0 }}>
+                  {selectedAmb.image
+                    ? <img src={selectedAmb.image} alt={selectedAmb.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : selectedAmb.country.slice(0, 2)
+                  }
                 </div>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: '18px', marginBottom: 4 }}>{selectedAmb.name}</div>
