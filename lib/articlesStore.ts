@@ -4,9 +4,9 @@ import { ARTICLES, CATS, FEATURED, Article } from '@/data/newsData';
 
 export const getArticles = async (): Promise<Article[]> => {
   await connectDB();
-  const docs = await ArticleModel.find().sort({ createdAt: -1 }).lean();
+  const docs = await ArticleModel.find({ id: { $exists: true, $ne: null } }).sort({ createdAt: -1 }).lean();
   if (docs.length > 0) return docs as unknown as Article[];
-  return ARTICLES; // MongoDB хоосон бол seed data буцаана
+  return ARTICLES;
 };
 
 export const getArticleById = async (id: number): Promise<Article | null> => {
