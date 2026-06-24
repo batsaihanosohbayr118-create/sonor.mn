@@ -15,20 +15,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const form = formidable({ maxFileSize: 5 * 1024 * 1024 });
 
-  form.parse(req, async (err, _fields, files) => {
-    if (err) return res.status(500).json({ message: 'Upload алдаа' });
+  try {
+    const [, files] = await form.parse(req);
 
     const file = Array.isArray(files.file) ? files.file[0] : files.file;
     if (!file) return res.status(400).json({ message: 'Файл олдсонгүй' });
 
-    try {
-      const result = await cloudinary.uploader.upload(file.filepath, {
-        folder: 'sonornews',
-      });
+    const result = await cloudinary.uploader.upload(file.filepath, {
+      folder: 'sonornews',
+    });
 
-      res.status(200).json({ url: result.secure_url });
-    } catch (e: any) {
-      res.status(500).json({ message: e.message });
-    }
-  });
+    return res.status(200).json({ url: result.secure_url });
+   } catch (e: any) {
+  console.error('Upload error:', e);
+  return res.status(500).json({ message: e.message });
+}
 }

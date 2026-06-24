@@ -5,14 +5,15 @@ import { ARTICLES, CATS, FEATURED, Article } from '@/data/newsData';
 export const getArticles = async (): Promise<Article[]> => {
   await connectDB();
   const docs = await ArticleModel.find({ id: { $exists: true, $ne: null } }).sort({ createdAt: -1 }).lean();
-  if (docs.length > 0) return docs as unknown as Article[];
+  if (docs.length > 0) return JSON.parse(JSON.stringify(docs)) as Article[];
   return ARTICLES;
 };
 
 export const getArticleById = async (id: number): Promise<Article | null> => {
   await connectDB();
   const doc = await ArticleModel.findOne({ id }).lean();
-  return doc ? (doc as unknown as Article) : null;
+  if (!doc) return null;
+  return JSON.parse(JSON.stringify(doc)) as Article;
 };
 
 export const getFeaturedArticles = (articles: Article[]) => {

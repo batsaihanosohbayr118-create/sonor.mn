@@ -340,7 +340,7 @@ img{
 
 /* nav */
 nav.main{
-  background:#3f57c3;
+  background:#0076cc;
   position:sticky;
   top:0;
   z-index:50;
@@ -422,7 +422,7 @@ nav.main a.active::after{
 .nav-drawer{
   display:none;
   flex-direction:column;
-  background:#3f57c3;
+  background:#0076cc;
   border-top:1px solid rgba(255,255,255,.15)
 }
 .nav-drawer a{
