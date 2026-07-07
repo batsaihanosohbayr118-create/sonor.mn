@@ -26,7 +26,7 @@ export default function Footer() {
           </div>
           <div>
             <h5>Дагах</h5>
-            <a href="https://www.facebook.com/share/18S8xE4tLi/" target="_blank" rel="noopener noreferrer">Facebook</a><a href="https://x.com/SonorNews" target="_blank" rel="noopener noreferrer">X (Twitter)</a><a href="https://youtube.com/@sonornews" target="_blank" rel="noopener noreferrer">YouTube</a><a>И-мэйл захиалга</a>
+            <a href="https://www.facebook.com/share/18S8xE4tLi/" target="_blank" rel="noopener noreferrer">Facebook</a><a href="https://x.com/SonorNews" target="_blank" rel="noopener noreferrer">X (Twitter)</a><a href="https://youtube.com/@sonornews" target="_blank" rel="noopener noreferrer">YouTube</a><a href="mailto:sonornews@gmail.com" target="_blank" rel="noopener noreferrer">И-мэйл захиалга</a>
           </div>
         </div>
         <div className="fbottom">
