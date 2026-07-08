@@ -1,14 +1,14 @@
 :root{
   /* Брэнд өнгө — логоны цэнхэр (#0076cc) болон улаан (#C73A43) */
-  --navy:#0076cc;        /* логоны дөрвөлжин өнгөтэй яг таарна — navbar */
-  --blue:#0076cc;        /* үндсэн брэнд цэнхэр */
-  --blue-accent:#0076cc; /* hover */
+  --navy:#5b6163;        /* логоны дөрвөлжин өнгөтэй яг таарна — navbar */
+  --blue:#5b6163;        /* үндсэн брэнд цэнхэр */
+  --blue-accent:#40474a; /* hover */
   --red:#e71c2d;         /* логоны улаан */
   --green:#1C7C54; --amber:#C97A0E;
   --ink:#16181d; --muted:#646b75; --faint:#8b919b;
-  --paper:#f0eff8;       /* цэнхэр #0076cc + улаан #C73A43 хольсон цайвар тон */
-  --surface:#e6e4f2;     /* card/panel дэвсгэр */
-  --line:#ccc9e4;        /* хүрээ */
+  --paper:#f7f4ea;       /* сонины цаасны өнгө — дулаан цайвар шаргал тон */
+  --surface:#ece7d8;     /* card/panel дэвсгэр — сонины цаасны сүүдэртэй хувилбар */
+  --line:#ddd4bd;        /* хүрээ */
   --serif:'PT Serif',Georgia,'Times New Roman',serif;
   --sans:'Inter',system-ui,-apple-system,sans-serif;
 }
@@ -332,19 +332,31 @@ img{
 /* tricolor rule */
 .tricolor{
   display:flex;
-  height:4px
+  height:4px;
+  background:#9ca1a4;
+  margin-bottom:6px
 }
 
-.tricolor span:nth-child(1){flex:6;background:var(--blue)}
-.tricolor span:nth-child(2){flex:4;background:var(--red)}
+.tricolor span{background:#9ca1a4}
 
 /* nav */
 nav.main{
-  background:#0076cc;
+  background:#5b6163;
   position:sticky;
   top:0;
   z-index:50;
+  margin-bottom:10px;
   box-shadow:0 2px 8px rgba(0,0,0,.08)
+}
+
+nav.main::after{
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(100% + 6px);
+  height:4px;
+  background:#9ca1a4
 }
 
 nav.main .wrap{
@@ -501,10 +513,10 @@ main{
   margin:0 auto
 }
 
-/* layout grid — 3 column: main | side | videoside */
+/* layout grid — 2 wide columns: main | side (includes ads + video) */
 .grid{
   display:grid;
-  grid-template-columns:1.7fr 1fr 1fr;
+  grid-template-columns:1.15fr 1fr;
   gap:28px
 }
 .grid > :first-child{
@@ -513,10 +525,6 @@ main{
 }
 aside.side{
   grid-column:2;
-  grid-row:1
-}
-aside.videoside{
-  grid-column:3;
   grid-row:1
 }
 
@@ -531,6 +539,8 @@ aside.videoside{
 
 .ad-banner img{
   width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
   display:block;
   border-radius:10px;
   transition:transform .4s ease, filter .4s ease
@@ -782,6 +792,66 @@ aside.videoside{
 }
 .featlist a:hover span.t{
   color:var(--blue)
+}
+
+/* featured video list card */
+.videolist-items{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  max-height:600px;
+  overflow-y:auto;
+  padding-right:4px
+}
+.videolist-items::-webkit-scrollbar{
+  width:6px
+}
+.videolist-items::-webkit-scrollbar-thumb{
+  background:var(--line);
+  border-radius:3px
+}
+.video-embed{
+  display:flex;
+  flex-direction:column;
+  gap:6px
+}
+.video-frame{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  border-radius:10px;
+  overflow:hidden;
+  background:#000
+}
+.video-frame iframe{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:0
+}
+.video-title{
+  font-size:13px;
+  font-weight:600;
+  line-height:1.35;
+  color:var(--ink)
+}
+
+/* big promo card — ad (left) + featured video (right), side by side */
+.promo-card{
+  padding:14px
+}
+.promo-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  align-items:start
+}
+.promo-grid .ad-banner{
+  height:100%
+}
+.promo-grid .ad-banner img{
+  height:100%
 }
 
 /* fact-check */
@@ -1932,7 +2002,7 @@ footer .wrap{
 
 @media(max-width:760px){
   .grid{grid-template-columns:1fr;gap:24px}
-  .grid > :first-child,.grid aside.side,.grid aside.videoside{grid-column:1;grid-row:auto}
+  .grid > :first-child,.grid aside.side{grid-column:1;grid-row:auto}
   .masthead .wrap{height:60px;padding-top:0;padding-bottom:0;display:flex;justify-content:space-between;align-items:center}
   .logo-link{height:60px}
   .logo{height:44px;max-width:180px;transform:scale(1.0)}
