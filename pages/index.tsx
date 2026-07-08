@@ -6,8 +6,8 @@ import ArticleCard from '@/components/ArticleCard';
 import FeaturedList from '@/components/FeaturedList';
 import FactCheckCard from '@/components/FactCheckCard';
 import PollCard from '@/components/PollCard';
+import AdBanner from '@/components/AdBanner';
 import VideoSidebar from '@/components/VideoSidebar';
-import FeaturedPromoCard from '@/components/FeaturedPromoCard';
 import { getArticles, getFeaturedArticles } from '@/lib/articlesStore';
 import { getActiveAds } from '@/lib/adsStore';
 import { getActiveVideos } from '@/lib/videosStore';
@@ -60,11 +60,17 @@ export default function HomePage({ heroArticle, politicsArticles, featuredArticl
         ))}
       </div>
       <aside className="side">
-        <FeaturedPromoCard ads={ads} video={videos[0] ?? null} />
-        <VideoSidebar videos={videos.slice(1)} />
-        <FeaturedList featuredArticles={featuredArticles} />
-        <FactCheckCard fact={latestFact} />
-        <PollCard />
+        <div className="promo-row">
+          <AdBanner ads={ads} />
+          <VideoSidebar videos={videos} />
+        </div>
+        <div className="featured-row">
+          <FeaturedList featuredArticles={featuredArticles} />
+          <div className="featured-row-right">
+            <FactCheckCard fact={latestFact} />
+            <PollCard />
+          </div>
+        </div>
       </aside>
     </div>
   );

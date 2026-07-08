@@ -8,12 +8,15 @@ interface VideoSidebarProps {
 export default function VideoSidebar({ videos }: VideoSidebarProps) {
   if (videos.length === 0) return null;
 
+  // Хамгийн сүүлд нэмэгдсэн видеог эхэнд харуулна
+  const orderedVideos = [...videos].reverse();
+
   return (
     <div className="card videolist">
       <div className="head">Онцлох видео</div>
       <div className="pad">
         <div className="videolist-items">
-          {videos.map(video => (
+          {orderedVideos.map(video => (
             <div key={video.id} className="video-embed">
               <div className="video-frame">
                 <iframe
