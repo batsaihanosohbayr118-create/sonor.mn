@@ -3,7 +3,7 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { readFacts, Fact } from '@/lib/factsStore';
 
 export const getServerSideProps: GetServerSideProps<{ facts: Fact[] }> = async () => {
-  return { props: { facts: readFacts() } };
+  return { props: { facts: await readFacts() } };
 };
 
 type Props = InferGetServerSidePropsType<typeof getServerSideProps>;

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@upstash/redis": "^1.38.0",
     "cloudinary": "^2.10.0",
     "d3": "^7.9.0",

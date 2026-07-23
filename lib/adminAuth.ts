@@ -3,11 +3,16 @@ import type { GetServerSidePropsContext, NextApiRequest, NextApiResponse } from 
 
 const COOKIE_NAME = 'sonor_admin';
 const MAX_AGE_SECONDS = 60 * 60 * 8;
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+// A per-process random fallback so production never signs sessions with a
+// known constant when ADMIN_SESSION_SECRET is missing.
+const RANDOM_SECRET = crypto.randomBytes(32).toString('hex');
 
 const getSecret = () =>
   process.env.ADMIN_SESSION_SECRET ||
   process.env.ADMIN_PASSWORD ||
-  'sonor-local-admin-secret';
+  (IS_PROD ? RANDOM_SECRET : 'sonor-local-admin-secret');
 
 const base64url = (value: string | Buffer) =>
   Buffer.from(value).toString('base64url');
@@ -28,10 +33,21 @@ const parseCookies = (cookieHeader?: string) => {
   return cookies;
 };
 
-export const getAdminCredentials = () => ({
-  username: process.env.ADMIN_USERNAME || 'admin',
-  password: process.env.ADMIN_PASSWORD || 'admin123',
-});
+export const getAdminCredentials = () => {
+  const username = process.env.ADMIN_USERNAME;
+  const password = process.env.ADMIN_PASSWORD;
+
+  // In production, never fall back to weak defaults — an unset password makes
+  // login impossible until real credentials are configured.
+  if (IS_PROD && (!username || !password)) {
+    return { username: '\0', password: crypto.randomBytes(32).toString('hex') };
+  }
+
+  return {
+    username: username || 'admin',
+    password: password || 'admin123',
+  };
+};
 
 export const createAdminCookie = (username: string) => {
   const expiresAt = Date.now() + MAX_AGE_SECONDS * 1000;

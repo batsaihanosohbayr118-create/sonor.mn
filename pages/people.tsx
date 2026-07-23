@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MP } from '@/data/newsData';
-import { AmbassadorRecord } from '@/lib/ambassadorsStore';
+import type { AmbassadorRecord } from '@/lib/ambassadorsStore';
 
 type Amb = AmbassadorRecord;
 

@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { CATS, Article } from '@/data/newsData';
 import ArticleCard from '@/components/ArticleCard';
+import Seo from '@/components/Seo';
 import { getArticleById, getArticles } from '@/lib/articlesStore';
 import { GetServerSideProps } from 'next';
 
@@ -32,6 +33,13 @@ export default function ArticleDetail({ article, relatedArticles }: ArticleDetai
 
   return (
     <div className="article">
+      <Seo
+        title={article.title}
+        description={article.excerpt}
+        image={article.image || category.image}
+        path={`/articles/${article.id}`}
+        type="article"
+      />
       <Link href="/" className="backlink">← Буцах</Link>
 
       <span className={`cat ${category.color}`}>{category.label}</span>
@@ -54,8 +62,10 @@ export default function ArticleDetail({ article, relatedArticles }: ArticleDetai
       <div className="src">{article.src}</div>
       {relatedArticles.length > 0 && (
         <>
-          <div className="seclabel"><span className="bar"></span><h3>Холбоотой мэдээ</h3></div>
-          {relatedArticles.map(related => <ArticleCard key={related.id} article={related} />)}
+          <div className="section-head"><span className="bar"></span><h3>Холбоотой мэдээ</h3></div>
+          <div className="stack-card">
+            {relatedArticles.map(related => <ArticleCard key={related.id} article={related} />)}
+          </div>
         </>
       )}
     </div>
