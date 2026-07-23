@@ -4,10 +4,10 @@ import { isAdminRequest } from '@/lib/adminAuth';
 import { readMps, writeMps } from '@/lib/mpsStore';
 import { MP } from '@/data/newsData';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!isAdminRequest(req)) return res.status(401).json({ message: 'Unauthorized' });
 
-  const mps = readMps();
+  const mps = await readMps();
 
   if (req.method === 'GET') {
     return res.status(200).json({ mps });
@@ -19,7 +19,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     const newId = Math.max(0, ...mps.map(m => m.id)) + 1;
     const newMp: MP = { ...data, id: newId } as MP;
     const updated = [...mps, newMp];
-    writeMps(updated);
+    await writeMps(updated);
     return res.status(200).json({ mps: updated, mp: newMp });
   }
 
@@ -28,7 +28,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     if (!data.id) return res.status(400).json({ message: 'ID байхгүй байна.' });
     if (!data.name?.trim()) return res.status(400).json({ message: 'Нэрийг оруулна уу.' });
     const updated = mps.map(m => m.id === data.id ? { ...m, ...data } as MP : m);
-    writeMps(updated);
+    await writeMps(updated);
     const mp = updated.find(m => m.id === data.id)!;
     return res.status(200).json({ mps: updated, mp });
   }
@@ -37,7 +37,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     const id = Number(req.query.id);
     if (!id) return res.status(400).json({ message: 'ID байхгүй байна.' });
     const updated = mps.filter(m => m.id !== id);
-    writeMps(updated);
+    await writeMps(updated);
     return res.status(200).json({ mps: updated });
   }
 

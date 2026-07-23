@@ -1,29 +1,19 @@
-import { Redis } from '@upstash/redis';
+import { readCollection, writeCollection } from '@/lib/db';
 import type { Video } from '@/data/newsData';
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_KV_REST_API_URL!,
-  token: process.env.UPSTASH_REDIS_REST_KV_REST_API_TOKEN!,
-});
-
-const VIDEOS_KEY = 'videos:list';
-
-const readStoredVideos = async (): Promise<Video[]> => {
-  const videos = await redis.get<Video[]>(VIDEOS_KEY);
-  return Array.isArray(videos) ? videos : [];
-};
+const COLLECTION = 'videos';
 
 export const getVideos = async (): Promise<Video[]> => {
-  return readStoredVideos();
+  return readCollection<Video>(COLLECTION);
 };
 
 export const getActiveVideos = async (): Promise<Video[]> => {
-  const videos = await readStoredVideos();
+  const videos = await readCollection<Video>(COLLECTION);
   return videos.filter(video => video.active);
 };
 
 export const saveVideos = async (videos: Video[]) => {
-  await redis.set(VIDEOS_KEY, videos);
+  await writeCollection(COLLECTION, videos);
 };
 
 // YouTube линк (watch/youtu.be/embed/shorts, playlist эсвэл timestamp

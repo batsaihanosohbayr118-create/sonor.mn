@@ -3,10 +3,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { isAdminRequest } from '@/lib/adminAuth';
 import { readAmbassadors, writeAmbassadors, AmbassadorRecord } from '@/lib/ambassadorsStore';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!isAdminRequest(req)) return res.status(401).json({ message: 'Unauthorized' });
 
-  const ambassadors = readAmbassadors();
+  const ambassadors = await readAmbassadors();
 
   if (req.method === 'GET') {
     return res.status(200).json({ ambassadors });
@@ -18,7 +18,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ message: 'Нэр болон улсыг оруулна уу.' });
     }
     const updated = [...ambassadors, data];
-    writeAmbassadors(updated);
+    await writeAmbassadors(updated);
     return res.status(200).json({ ambassadors: updated, ambassador: data });
   }
 
@@ -32,7 +32,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ message: 'Нэр болон улсыг оруулна уу.' });
     }
     const updated = ambassadors.map((a, i) => i === idx ? data : a);
-    writeAmbassadors(updated);
+    await writeAmbassadors(updated);
     return res.status(200).json({ ambassadors: updated, ambassador: data });
   }
 
@@ -42,7 +42,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ message: 'Индекс буруу байна.' });
     }
     const updated = ambassadors.filter((_, i) => i !== idx);
-    writeAmbassadors(updated);
+    await writeAmbassadors(updated);
     return res.status(200).json({ ambassadors: updated });
   }
 

@@ -15,7 +15,7 @@ export default function Footer() {
             <Link href="/politics?cat=uih">УИХ</Link>
             <Link href="/politics?cat=gov">Засгийн газар</Link>
             <Link href="/politics?cat=election">Сонгууль</Link>
-            <Link href="/politics?cat=economy">Эдийн засаг</Link>
+            <Link href="/economy">Эдийн засаг</Link>
           </div>
           <div>
             <h5>Итгэлийн төв</h5>

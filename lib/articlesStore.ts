@@ -1,19 +1,59 @@
-import { connectDB } from '@/lib/mongodb';
-import ArticleModel from '@/models/Article';
+import { readCollection, writeCollection } from '@/lib/db';
 import { ARTICLES, CATS, FEATURED, Article } from '@/data/newsData';
 
+const COLLECTION = 'articles';
+
+type StoredArticle = Article & { createdAt?: string };
+
+const sortStoredArticles = (articles: StoredArticle[]) =>
+  [...articles].sort((a, b) => {
+    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    if (aTime !== bTime) return bTime - aTime;
+    return b.id - a.id;
+  });
+
+const stripCreatedAt = ({ createdAt, ...article }: StoredArticle): Article => article;
+
+const withCreatedAt = (article: Article, createdAt = new Date().toISOString()): StoredArticle => ({
+  ...article,
+  createdAt,
+});
+
+const readStored = () => readCollection<StoredArticle>(COLLECTION);
+const writeStored = (articles: StoredArticle[]) => writeCollection(COLLECTION, sortStoredArticles(articles));
+
 export const getArticles = async (): Promise<Article[]> => {
-  await connectDB();
-  const docs = await ArticleModel.find({ id: { $exists: true, $ne: null } }).sort({ createdAt: -1 }).lean();
-  if (docs.length > 0) return JSON.parse(JSON.stringify(docs)) as Article[];
-  return ARTICLES;
+  const stored = await readStored();
+  const list = sortStoredArticles(stored).map(stripCreatedAt);
+  return list.length > 0 ? list : ARTICLES;
 };
 
 export const getArticleById = async (id: number): Promise<Article | null> => {
-  await connectDB();
-  const doc = await ArticleModel.findOne({ id }).lean();
-  if (!doc) return null;
-  return JSON.parse(JSON.stringify(doc)) as Article;
+  const stored = await readStored();
+  const match = stored.find(article => article.id === id);
+  return match ? stripCreatedAt(match) : null;
+};
+
+export const saveArticle = async (article: Article): Promise<Article[]> => {
+  const articles = await readStored();
+  const next = withCreatedAt(article);
+  const index = articles.findIndex(item => item.id === article.id);
+
+  if (index >= 0) {
+    articles[index] = { ...articles[index], ...next, createdAt: articles[index].createdAt ?? next.createdAt };
+  } else {
+    articles.push(next);
+  }
+
+  await writeStored(articles);
+  return getArticles();
+};
+
+export const deleteArticle = async (id: number): Promise<Article[]> => {
+  const articles = (await readStored()).filter(article => article.id !== id);
+  await writeStored(articles);
+  return getArticles();
 };
 
 export const getFeaturedArticles = (articles: Article[]) => {

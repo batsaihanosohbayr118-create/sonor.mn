@@ -4,21 +4,29 @@ import Header from './Header';
 import NavBar from './NavBar';
 import Ticker from './Ticker';
 import Footer from './Footer';
-import SearchBar from './SearchBar';
 
-export default function Layout({ children, toggleSearch, isSearchOpen, closeSearch }) {
+export default function Layout({ children }) {
   return (
     <>
       <Head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Сонор.мн — Хараат бус улс төрийн мэдээ</title>
+        <meta name="theme-color" content="#0d3b8c" />
+        <link rel="icon" href="/logo/Sonor.png" />
+        <title>Сонор.мн — Хараат бус, шуурхай мэдээ</title>
+        <meta
+          name="description"
+          content="Хараат бус, шуурхай, итгэлтэй мэдээллийн эх сурвалж — улс төр, эдийн засаг, нийгмийн мэдээ."
+        />
+        <meta property="og:site_name" content="Сонор.мн" />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="mn_MN" />
+        <meta property="og:image" content="https://sonor.mn/logo/Sonor.png" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
-      <UtilityBar toggleSearch={toggleSearch} />
-      <SearchBar isSearchOpen={isSearchOpen} closeSearch={closeSearch} />
+      <UtilityBar />
       <Header />
-      <div className="tricolor"><span></span><span></span></div>
-      <NavBar closeSearch={closeSearch} />
+      <NavBar />
       <Ticker />
       <main><div className="wrap">{children}</div></main>
       <Footer />
