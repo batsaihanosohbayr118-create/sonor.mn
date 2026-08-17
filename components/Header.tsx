@@ -44,7 +44,6 @@ export default function Header() {
           }}
         >
           Санал хүсэлт
-          <span className="feedback-icon">💬</span>
         </button>
       </div>
     </header>

@@ -5,13 +5,14 @@ import { readMps, writeMps } from '@/lib/mpsStore';
 import { MP } from '@/data/newsData';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'GET') {
+    const mps = await readMps();
+    return res.status(200).json({ mps });
+  }
+
   if (!isAdminRequest(req)) return res.status(401).json({ message: 'Unauthorized' });
 
   const mps = await readMps();
-
-  if (req.method === 'GET') {
-    return res.status(200).json({ mps });
-  }
 
   if (req.method === 'POST') {
     const data = req.body as Partial<MP>;

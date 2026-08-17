@@ -1,5 +1,5 @@
 import { readCollection, writeCollection } from '@/lib/db';
-import { ARTICLES, CATS, FEATURED, Article } from '@/data/newsData';
+import { CATS, FEATURED, Article } from '@/data/newsData';
 
 const COLLECTION = 'articles';
 
@@ -25,8 +25,7 @@ const writeStored = (articles: StoredArticle[]) => writeCollection(COLLECTION, s
 
 export const getArticles = async (): Promise<Article[]> => {
   const stored = await readStored();
-  const list = sortStoredArticles(stored).map(stripCreatedAt);
-  return list.length > 0 ? list : ARTICLES;
+  return sortStoredArticles(stored).map(stripCreatedAt);
 };
 
 export const getArticleById = async (id: number): Promise<Article | null> => {

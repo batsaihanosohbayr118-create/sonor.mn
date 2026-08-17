@@ -48,6 +48,25 @@ const formatUpdatedTime = (value: string) => {
   return date.toLocaleTimeString('mn-MN', { hour: '2-digit', minute: '2-digit' });
 };
 
+type WeatherTone = 'sun' | 'cloud' | 'rain' | 'snow' | 'storm';
+
+const TONE_COLORS: Record<WeatherTone, string> = {
+  sun: '#D97706',
+  cloud: '#64748B',
+  rain: '#2563EB',
+  snow: '#0891B2',
+  storm: '#DC2626',
+};
+
+const weatherVisual = (code?: number): { emoji: string; tone: WeatherTone } => {
+  if (code === 0) return { emoji: '☀️', tone: 'sun' };
+  if ([1, 2].includes(code ?? -1)) return { emoji: '⛅', tone: 'sun' };
+  if ([95, 96, 99].includes(code ?? -1)) return { emoji: '⛈️', tone: 'storm' };
+  if ([71, 73, 75, 77, 85, 86].includes(code ?? -1)) return { emoji: '🌨️', tone: 'snow' };
+  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code ?? -1)) return { emoji: '🌧️', tone: 'rain' };
+  return { emoji: '☁️', tone: 'cloud' };
+};
+
 export default function WeatherPage() {
   const [items, setItems] = useState<LocationWeather[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,16 +99,25 @@ export default function WeatherPage() {
         {(items.length > 0 ? items : WEATHER_LOCATIONS.map(location => ({ location, current: null, error: false }))).map(item => {
           const current = item.current;
           const label = current ? WEATHER_CODES[current.weathercode] ?? 'Үүлэрхэг' : 'Түр хүлээнэ үү';
+          const { emoji, tone } = weatherVisual(current?.weathercode);
 
           return (
-            <Link href={`/weather/${item.location.id}`} className="weather-card" key={item.location.id}>
+            <Link
+              href={`/weather/${item.location.id}`}
+              className="weather-card"
+              key={item.location.id}
+              style={{ ['--tone-color' as string]: TONE_COLORS[tone] }}
+            >
               <div className="weather-card-top">
-                <div>
-                  <h2>{item.location.province}</h2>
-                  <span>{item.location.center}</span>
+                <div className="weather-card-id">
+                  <span className="weather-icon-badge" aria-hidden="true">{emoji}</span>
+                  <div>
+                    <h2>{item.location.province}</h2>
+                    <span>{item.location.center}</span>
+                  </div>
                 </div>
                 <div className="weather-card-temp">
-                  <strong>{current ? `${Math.round(current.temperature)}°C` : '--'}</strong>
+                  <strong>{current ? `${Math.round(current.temperature)}°` : '--'}</strong>
                 </div>
               </div>
               <p className="weather-state">{item.error ? 'Мэдээлэл татаж чадсангүй' : label}</p>
