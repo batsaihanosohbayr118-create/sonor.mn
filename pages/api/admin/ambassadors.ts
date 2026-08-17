@@ -4,13 +4,14 @@ import { isAdminRequest } from '@/lib/adminAuth';
 import { readAmbassadors, writeAmbassadors, AmbassadorRecord } from '@/lib/ambassadorsStore';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'GET') {
+    const ambassadors = await readAmbassadors();
+    return res.status(200).json({ ambassadors });
+  }
+
   if (!isAdminRequest(req)) return res.status(401).json({ message: 'Unauthorized' });
 
   const ambassadors = await readAmbassadors();
-
-  if (req.method === 'GET') {
-    return res.status(200).json({ ambassadors });
-  }
 
   if (req.method === 'POST') {
     const data = req.body as AmbassadorRecord;

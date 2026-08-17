@@ -5,7 +5,6 @@ export default function Ticker() {
   const [headline, setHeadline] = useState({
     title: '1212.mn-ээс сүүлийн статистикийн шинэчлэлийг татаж байна...',
     url: '/politics',
-    time: 'ШУУРХАЙ',
   });
 
   useEffect(() => {
@@ -19,7 +18,6 @@ export default function Ticker() {
         setHeadline({
           title: item.title,
           url: item.url,
-          time: item.time || 'ШУУРХАЙ',
         });
       })
       .catch(() => {});
@@ -34,13 +32,14 @@ export default function Ticker() {
       <div className="wrap ticker-inner">
         <div className="ticker-left">
           <span className="ticker-tag">ШУУРХАЙ</span>
-          <span className="ticker-time">07:45</span>
         </div>
         <div className="ticker-track">
-          <a href={headline.url} className="ticker-link" target={headline.url.startsWith('http') ? '_blank' : undefined} rel={headline.url.startsWith('http') ? 'noreferrer' : undefined}>
-            {headline.title}
-            <span className="ticker-arrow">›</span>
-          </a>
+          <div className="ticker-marquee">
+            <a href={headline.url} className="ticker-link" target={headline.url.startsWith('http') ? '_blank' : undefined} rel={headline.url.startsWith('http') ? 'noreferrer' : undefined}>
+              {headline.title}
+              <span className="ticker-arrow">›</span>
+            </a>
+          </div>
         </div>
         <Link href="/politics" className="ticker-all">
           Бүгдийг харах <span>•</span>
