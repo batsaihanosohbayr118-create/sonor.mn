@@ -13,8 +13,6 @@ const sortStoredArticles = (articles: StoredArticle[]) =>
     return b.id - a.id;
   });
 
-const stripCreatedAt = ({ createdAt, ...article }: StoredArticle): Article => article;
-
 const withCreatedAt = (article: Article, createdAt = new Date().toISOString()): StoredArticle => ({
   ...article,
   createdAt,
@@ -25,13 +23,13 @@ const writeStored = (articles: StoredArticle[]) => writeCollection(COLLECTION, s
 
 export const getArticles = async (): Promise<Article[]> => {
   const stored = await readStored();
-  return sortStoredArticles(stored).map(stripCreatedAt);
+  return sortStoredArticles(stored);
 };
 
 export const getArticleById = async (id: number): Promise<Article | null> => {
   const stored = await readStored();
   const match = stored.find(article => article.id === id);
-  return match ? stripCreatedAt(match) : null;
+  return match ?? null;
 };
 
 export const saveArticle = async (article: Article): Promise<Article[]> => {

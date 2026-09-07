@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MP } from '@/data/newsData';
 import type { AmbassadorRecord } from '@/lib/ambassadorsStore';
+import Seo from '@/components/Seo';
 
 type Amb = AmbassadorRecord;
 
@@ -31,6 +32,11 @@ export default function People() {
 
   return (
     <>
+      <Seo
+        title="Улс төрчид"
+        description="УИХ-ын гишүүд болон Монгол Улсын элчин сайдын мэдээлэл нэг дороос."
+        path="/people"
+      />
       <div style={{ marginBottom: 16 }} className="people-filter">
         <button className={view === 'members' ? 'active' : ''} onClick={() => setView('members')}>УИХ-ын гишүүд</button>
         <button className={view === 'ambassadors' ? 'active' : ''} onClick={() => setView('ambassadors')}>Элчин сайд</button>

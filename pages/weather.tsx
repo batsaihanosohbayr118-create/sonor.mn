@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { WEATHER_CODES, WEATHER_LOCATIONS, WeatherLocation } from '@/lib/weather';
+import Seo from '@/components/Seo';
 
 interface CurrentWeather {
   temperature: number;
@@ -84,6 +85,11 @@ export default function WeatherPage() {
 
   return (
     <div className="weather-page">
+      <Seo
+        title="Цаг агаар"
+        description="Монгол улсын аймаг, нийслэлийн одоогийн цаг агаарын мэдээ."
+        path="/weather"
+      />
       <div className="weather-head">
         <div className="weather-head-copy">
           <span className="weather-kicker">Одоогийн төлөв</span>
