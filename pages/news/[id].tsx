@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { GetServerSideProps } from 'next';
 import { CATS } from '@/data/newsData';
 import { getOfficialArticle, getOfficialFeed, OfficialArticle, OfficialFeedItem } from '@/lib/officialFeed';
-import Seo from '@/components/Seo';
+import Seo, { organizationJsonLd, SITE_URL } from '@/components/Seo';
 
 interface NewsDetailProps {
   article: OfficialArticle;
@@ -34,6 +34,15 @@ export default function NewsDetail({ article, related }: NewsDetailProps) {
         image={article.image}
         path={`/news/${article.id}`}
         type="article"
+        jsonLd={{
+          '@type': 'NewsArticle',
+          headline: article.title,
+          description: article.paragraphs[0]?.slice(0, 160),
+          image: article.image ? [article.image] : undefined,
+          author: { '@type': 'Organization', name: 'Үндэсний статистикийн хороо (1212.mn)' },
+          publisher: organizationJsonLd,
+          mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/news/${article.id}` },
+        }}
       />
       <Link href="/economy" className="backlink">← Буцах</Link>
 

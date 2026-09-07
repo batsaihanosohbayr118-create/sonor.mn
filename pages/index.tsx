@@ -5,7 +5,7 @@ import { getArticles, getFeaturedArticles } from '@/lib/articlesStore';
 import { getOfficialFeed, OfficialFeedItem } from '@/lib/officialFeed';
 import { getActiveVideos } from '@/lib/videosStore';
 import NewsCard from '@/components/NewsCard';
-import Seo from '@/components/Seo';
+import Seo, { organizationJsonLd, SITE, SITE_URL } from '@/components/Seo';
 
 type Story = {
   id: string;
@@ -215,7 +215,17 @@ export default function HomePage({ heroStory, spotlightStories, cardStories, fea
 
   return (
     <div className="home-shell">
-      <Seo path="/" />
+      <Seo
+        path="/"
+        jsonLd={[
+          organizationJsonLd,
+          {
+            '@type': 'WebSite',
+            name: SITE,
+            url: SITE_URL,
+          },
+        ]}
+      />
       <div className="home-main">
         <div className="top-main">
           <div className="hero-column">

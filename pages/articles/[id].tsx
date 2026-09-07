@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { CATS, Article } from '@/data/newsData';
 import ArticleCard from '@/components/ArticleCard';
-import Seo from '@/components/Seo';
+import Seo, { organizationJsonLd, SITE_URL } from '@/components/Seo';
 import { getArticleById, getArticles } from '@/lib/articlesStore';
 import { GetServerSideProps } from 'next';
 
@@ -39,6 +39,20 @@ export default function ArticleDetail({ article, relatedArticles }: ArticleDetai
         image={article.image || category.image}
         path={`/articles/${article.id}`}
         type="article"
+        publishedTime={article.createdAt}
+        author={article.author}
+        jsonLd={{
+          '@type': 'NewsArticle',
+          headline: article.title,
+          description: article.excerpt,
+          image: article.image || category.image ? [article.image || category.image] : undefined,
+          datePublished: article.createdAt,
+          dateModified: article.createdAt,
+          author: { '@type': 'Person', name: article.author || 'Редакц' },
+          publisher: organizationJsonLd,
+          mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/articles/${article.id}` },
+          articleSection: category.label,
+        }}
       />
       <Link href="/" className="backlink">← Буцах</Link>
 

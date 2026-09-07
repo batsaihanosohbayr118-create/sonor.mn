@@ -16,6 +16,7 @@ export interface Article {
   image?: string;
   body: string[];
   src: string;
+  createdAt?: string;
 }
 
 export interface Ad {
