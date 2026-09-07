@@ -1,7 +1,7 @@
 import Head from 'next/head';
 
 const SITE = 'Сонор.мн';
-const SITE_URL = 'https://sonornews.mn';
+const SITE_URL = 'https://www.sonornews.mn';
 const DEFAULT_DESC =
   'Хараат бус, шуурхай, итгэлтэй мэдээллийн эх сурвалж — улс төр, эдийн засаг, нийгмийн мэдээ.';
 const DEFAULT_IMAGE = `${SITE_URL}/logo/Sonor.png`;

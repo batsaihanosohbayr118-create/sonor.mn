@@ -21,7 +21,7 @@ export default function Layout({ children }) {
         <meta property="og:site_name" content="Сонор.мн" />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="mn_MN" />
-        <meta property="og:image" content="https://sonornews.mn/logo/Sonor.png" />
+        <meta property="og:image" content="https://www.sonornews.mn/logo/Sonor.png" />
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <UtilityBar />
