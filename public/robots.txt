@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 
-Sitemap: https://sonornews.mn/sitemap.xml
+Sitemap: https://www.sonornews.mn/sitemap.xml

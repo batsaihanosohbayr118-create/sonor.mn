@@ -2,7 +2,7 @@ import type { GetServerSideProps } from 'next';
 import { getArticles } from '@/lib/articlesStore';
 import { getOfficialFeed } from '@/lib/officialFeed';
 
-const SITE_URL = 'https://sonornews.mn';
+const SITE_URL = 'https://www.sonornews.mn';
 const STATIC_PATHS = ['/', '/economy', '/factcheck', '/people', '/policy', '/weather'];
 
 const urlEntry = (loc: string, lastmod?: string) =>
