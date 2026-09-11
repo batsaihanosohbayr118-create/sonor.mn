@@ -2305,6 +2305,12 @@ main{
   border-radius:var(--radius);
   box-shadow:0 12px 30px rgba(16,24,40,.12);
   z-index:80;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+.utility-rate-menu::-webkit-scrollbar{
+  display:none;
 }
 
 .utility-rate-row{
@@ -3359,6 +3365,12 @@ nav.main::after{
   padding:16px 16px 14px;
   display:flex;
   flex-direction:column;
+  transition:box-shadow .15s,transform .15s;
+}
+
+.kpi-card:hover{
+  box-shadow:0 8px 22px rgba(16,24,40,.1);
+  transform:translateY(-2px);
 }
 
 .kpi-head{
@@ -3451,8 +3463,15 @@ nav.main::after{
   display:flex;
   align-items:center;
   gap:11px;
-  padding:13px 0;
+  padding:13px 16px;
+  margin:0 -16px;
   border-bottom:1px solid var(--line);
+  border-radius:8px;
+  transition:background .15s;
+}
+
+.stat-row:hover{
+  background:var(--paper);
 }
 
 .stat-ico{
