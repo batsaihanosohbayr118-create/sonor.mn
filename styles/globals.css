@@ -2748,6 +2748,7 @@ nav.main::after{
   position:relative;
   width:100%;
   aspect-ratio:16/10;
+  min-height:240px;
   overflow:hidden;
   background:var(--navy);
 }
@@ -2804,6 +2805,11 @@ nav.main::after{
   letter-spacing:-.01em;
   margin-bottom:9px;
   max-width:92%;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  line-clamp:2;
+  overflow:hidden;
 }
 
 .hero-card-body p{
@@ -2812,6 +2818,11 @@ nav.main::after{
   color:rgba(255,255,255,.85);
   max-width:88%;
   margin-bottom:13px;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  line-clamp:2;
+  overflow:hidden;
 }
 
 .card-meta{
